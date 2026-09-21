@@ -55,6 +55,8 @@ import {
 } from "lucide-react";
 import "./fonts.css";
 import "./style.css";
+import MobileExperience, { MobileBrowse } from "./Mobile.jsx";
+import { useMedia, useTaskCelebration, CompletionEffects } from "./motion.jsx";
 
 const KEY = "daylight.workspace.v1";
 const uid = () => crypto.randomUUID();
@@ -300,9 +302,10 @@ function Modal({ children, onClose, title, wide = false }) {
   useEffect(() => {
     const previous = document.activeElement;
     const first =
-      ref.current?.querySelector("input:not([hidden]),textarea,select") ||
-      ref.current?.querySelector("button");
-    first?.focus();
+      (!window.matchMedia("(max-width: 767px)").matches
+        ? ref.current?.querySelector("input:not([hidden]),textarea,select")
+        : null) || ref.current?.querySelector("button");
+    first?.focus({ preventScroll: true });
     document.querySelector(".sidebar")?.setAttribute("inert", "");
     document.querySelector(".app-body")?.setAttribute("inert", "");
     document.body.style.overflow = "hidden";
@@ -313,7 +316,7 @@ function Modal({ children, onClose, title, wide = false }) {
           ...ref.current.querySelectorAll(
             'button,input,select,textarea,[tabindex="0"]',
           ),
-        ].filter((el) => !el.disabled);
+        ].filter((el) => !el.disabled && el.getClientRects().length > 0);
         if (e.shiftKey && document.activeElement === els[0]) {
           e.preventDefault();
           els.at(-1)?.focus();
@@ -371,7 +374,7 @@ function Onboarding({ onFinish }) {
   ];
   return (
     <div
-      className={`onboarding theme-${p.theme}`}
+      className={`onboarding theme-${p.theme} onboarding-step-${step}`}
       style={{ "--accent": themes[p.theme].color }}
     >
       <header className="onboard-header">
@@ -647,6 +650,17 @@ function Onboarding({ onFinish }) {
           </div>
         </section>
         <aside className="onboard-art">
+          <img
+            className="mobile-onboard-art"
+            src={photo(
+              step === 0 || step === 2
+                ? "focus-sculpture"
+                : step === 1
+                  ? "mindful-morning"
+                  : "slow-moments",
+            )}
+            alt="A little inspiration for your personal space"
+          />
           <span className="art-top">LESS BUSY. MORE INTENTIONAL.</span>
           <h2>
             A little focus.
@@ -704,6 +718,8 @@ function Onboarding({ onFinish }) {
 }
 
 function App() {
+  const isMobile = useMedia("(max-width: 767px)");
+  const [mobileDay, setMobileDay] = useState(today);
   const [data, setData] = useState(load),
     [view, setView] = useState("My day"),
     [modal, setModal] = useState(null),
@@ -732,6 +748,10 @@ function App() {
       return { remaining: 1500, running: false, mode: "focus", taskId: "" };
     }
   });
+  const celebration = useTaskCelebration(data?.profile?.celebrations !== false);
+  useEffect(() => {
+    if (!isMobile && view === "You") setView("My day");
+  }, [isMobile, view]);
   const toastTimer = useRef();
   const notify = (text, action = null) => {
     clearTimeout(toastTimer.current);
@@ -823,6 +843,9 @@ function App() {
       <Onboarding
         onFinish={(p) => {
           setData(makeWorkspace(p));
+          requestAnimationFrame(() =>
+            window.scrollTo({ top: 0, behavior: "instant" }),
+          );
           setTimer({
             remaining: p.focus * 60,
             running: false,
@@ -842,6 +865,7 @@ function App() {
     setPriority("all");
     setProjectFilter("all");
     setFilters(false);
+    if (isMobile) window.scrollTo({ top: 0, behavior: "instant" });
   };
   const currentProject = projects.find((p) => p.id === view);
   const overdue = tasks.filter(
@@ -858,8 +882,10 @@ function App() {
   const focusMinutes = data.sessions
     .filter((s) => dateKey(new Date(s.at)) === today())
     .reduce((n, s) => n + s.minutes, 0);
-  const toggleTask = (t) => {
+  const toggleTask = (t, element) => {
     const done = t.status !== "done";
+    if (done && !celebration.celebrate(t, element)) return;
+    if (!done) celebration.clear(t.id);
     let next = null;
     if (done && t.repeat !== "none") next = nextOccurrence(t);
     update((d) => ({
@@ -884,19 +910,21 @@ function App() {
         next
           ? "Done! The next occurrence is ready."
           : "A little progress. Nicely done.",
-        () =>
+        () => {
+          celebration.clear(t.id);
           update((d) => ({
             ...d,
             tasks: d.tasks
               .filter((x) => x.repeatedFrom !== t.id)
               .map((x) => (x.id === t.id ? t : x)),
-          })),
+          }));
+        },
       );
   };
-  const setTaskStatus = (id, status) => {
+  const setTaskStatus = (id, status, element) => {
     const t = tasks.find((t) => t.id === id);
     if (!t) return;
-    if (status === "done" && t.status !== "done") toggleTask(t);
+    if (status === "done" && t.status !== "done") toggleTask(t, element);
     else if (t.status === "done" && status !== "done") {
       toggleTask(t);
       if (status === "doing")
@@ -921,6 +949,12 @@ function App() {
       }));
   };
   const saveTask = (t) => {
+    if (
+      t.status === "done" &&
+      tasks.find((x) => x.id === t.id)?.status !== "done"
+    )
+      celebration.celebrate(t);
+    if (t.status !== "done") celebration.clear(t.id);
     update((d) => {
       const previous = d.tasks.find((x) => x.id === t.id);
       let list = d.tasks;
@@ -1018,7 +1052,9 @@ function App() {
         view === "My day" &&
         !(
           t.due === today() ||
-          (t.due && t.due < today() && t.status !== "done")
+          (t.due &&
+            t.due < today() &&
+            (t.status !== "done" || celebration.recent.includes(t.id)))
         )
       )
         return false;
@@ -1026,7 +1062,12 @@ function App() {
       if (view === "Upcoming" && (!t.due || t.due <= today())) return false;
       if (view === "Completed" && t.status !== "done") return false;
       if (currentProject && t.projectId !== currentProject.id) return false;
-      if (view !== "Completed" && !showDone && t.status === "done")
+      if (
+        view !== "Completed" &&
+        !showDone &&
+        t.status === "done" &&
+        !celebration.recent.includes(t.id)
+      )
         return false;
       if (priority !== "all" && t.priority !== priority) return false;
       if (projectFilter !== "all" && t.projectId !== projectFilter)
@@ -1050,6 +1091,7 @@ function App() {
     );
   const rowProps = {
     projects,
+    recent: celebration.recent,
     onToggle: toggleTask,
     onEdit: (t) => setModal({ type: "task", task: t }),
     onFocus: startTaskFocus,
@@ -1190,7 +1232,7 @@ function App() {
   );
   return (
     <div
-      className={`app theme-${profile.theme}`}
+      className={`app theme-${profile.theme} ${profile.celebrations === false ? "less-motion" : ""} ${isMobile ? "mobile-app" : "desktop-app"}`}
       style={{
         "--accent": themes[profile.theme]?.color || themes.sunshine.color,
       }}
@@ -1198,515 +1240,586 @@ function App() {
       {mobileNav && (
         <div className="nav-scrim" onClick={() => setMobileNav(false)} />
       )}
-      <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
-        <Brand />
-        <button
-          className="workspace-switch"
-          onClick={() => setModal({ type: "settings" })}
-        >
-          <span className="workspace-avatar">
-            {profile.name[0].toUpperCase()}
-          </span>
-          <span>
-            My personal space<small>Just for you</small>
-          </span>
-          <ChevronDown size={14} />
-        </button>
-        <button
-          className="sidebar-search"
-          onClick={() => setModal({ type: "search" })}
-        >
-          <Search size={17} />
-          <span>Find anything</span>
-          <kbd>Ctrl K</kbd>
-        </button>
-        <div className="nav-label">YOUR WORKSPACE</div>
-        <nav>
-          {[
-            ["My day", Sun, activeToday],
-            [
-              "Inbox",
-              Inbox,
-              tasks.filter((t) => !t.projectId && t.status !== "done").length,
-            ],
-            ["Upcoming", CalendarDays, null],
-            ["Calendar", Calendar, null],
-            ["Focus", Timer, null],
-            ["Habits", Leaf, null],
-          ].map(([name, Icon, count]) => (
-            <button
-              key={name}
-              className={`nav-item ${view === name ? "active" : ""}`}
-              onClick={() => go(name)}
-            >
-              <Icon size={19} />
-              <span>{name}</span>
-              {count > 0 && <small>{count}</small>}
-              {name === "Focus" && timer.running && (
-                <span className="live-dot" />
-              )}
-            </button>
-          ))}
-        </nav>
-        <div className="nav-label project-label">
-          <button onClick={() => go("Projects")}>MY PROJECTS</button>
+      {!isMobile && (
+        <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
+          <Brand />
           <button
-            className="icon-btn"
-            aria-label="New project"
-            onClick={() => setModal({ type: "project" })}
-          >
-            <Plus size={16} />
-          </button>
-        </div>
-        <nav>
-          {projects.map((p) => (
-            <button
-              key={p.id}
-              className={`nav-item ${view === p.id ? "active" : ""}`}
-              onClick={() => go(p.id)}
-            >
-              <span className="project-dot" style={{ background: p.color }} />
-              <span>{p.name}</span>
-              <small>
-                {
-                  tasks.filter(
-                    (t) => t.projectId === p.id && t.status !== "done",
-                  ).length
-                }
-              </small>
-            </button>
-          ))}
-          <button
-            className={`nav-item ${view === "All tasks" ? "active" : ""}`}
-            onClick={() => go("All tasks")}
-          >
-            <LayoutGrid size={17} />
-            <span>All tasks</span>
-          </button>
-          <button
-            className={`nav-item ${view === "Completed" ? "active" : ""}`}
-            onClick={() => go("Completed")}
-          >
-            <CheckCheck size={18} />
-            <span>Completed</span>
-          </button>
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="install-card">
-            <div className="install-card-top">
-              <Monitor size={26} />
-              <span>
-                YOUR LITTLE
-                <br />
-                DESKTOP COMPANION
-              </span>
-              <Sparkles size={18} />
-            </div>
-            <p>A brighter day, one click away.</p>
-            <button onClick={install}>
-              Install Daylight
-              <ArrowUpRight size={15} />
-            </button>
-          </div>
-          <button
-            className="nav-item settings-btn"
+            className="workspace-switch"
             onClick={() => setModal({ type: "settings" })}
           >
-            <Settings size={18} />
-            <span>Settings & preferences</span>
-          </button>
-          <div className="sidebar-foot">
+            <span className="workspace-avatar">
+              {profile.name[0].toUpperCase()}
+            </span>
             <span>
-              <i />
-              Saved on this device
+              My personal space<small>Just for you</small>
             </span>
+            <ChevronDown size={14} />
+          </button>
+          <button
+            className="sidebar-search"
+            onClick={() => setModal({ type: "search" })}
+          >
+            <Search size={17} />
+            <span>Find anything</span>
+            <kbd>Ctrl K</kbd>
+          </button>
+          <div className="nav-label">YOUR WORKSPACE</div>
+          <nav>
+            {[
+              ["My day", Sun, activeToday],
+              [
+                "Inbox",
+                Inbox,
+                tasks.filter((t) => !t.projectId && t.status !== "done").length,
+              ],
+              ["Upcoming", CalendarDays, null],
+              ["Calendar", Calendar, null],
+              ["Focus", Timer, null],
+              ["Habits", Leaf, null],
+            ].map(([name, Icon, count]) => (
+              <button
+                key={name}
+                className={`nav-item ${view === name ? "active" : ""}`}
+                onClick={() => go(name)}
+              >
+                <Icon size={19} />
+                <span>{name}</span>
+                {count > 0 && <small>{count}</small>}
+                {name === "Focus" && timer.running && (
+                  <span className="live-dot" />
+                )}
+              </button>
+            ))}
+          </nav>
+          <div className="nav-label project-label">
+            <button onClick={() => go("Projects")}>MY PROJECTS</button>
             <button
               className="icon-btn"
-              aria-label="Help and shortcuts"
-              onClick={() => setModal({ type: "help" })}
+              aria-label="New project"
+              onClick={() => setModal({ type: "project" })}
             >
-              <CircleHelp size={16} />
+              <Plus size={16} />
             </button>
           </div>
-        </div>
-      </aside>
-      <div className="app-body">
-        <header className="topbar">
-          <div className="breadcrumb">
+          <nav>
+            {projects.map((p) => (
+              <button
+                key={p.id}
+                className={`nav-item ${view === p.id ? "active" : ""}`}
+                onClick={() => go(p.id)}
+              >
+                <span className="project-dot" style={{ background: p.color }} />
+                <span>{p.name}</span>
+                <small>
+                  {
+                    tasks.filter(
+                      (t) => t.projectId === p.id && t.status !== "done",
+                    ).length
+                  }
+                </small>
+              </button>
+            ))}
             <button
-              className="icon-btn mobile-menu"
-              aria-label="Open menu"
-              onClick={() => setMobileNav(true)}
+              className={`nav-item ${view === "All tasks" ? "active" : ""}`}
+              onClick={() => go("All tasks")}
             >
-              <Menu size={20} />
-            </button>
-            <span>My workspace</span>
-            <ChevronRight size={13} />
-            <b>{currentProject?.name || view}</b>
-          </div>
-          <div className="topbar-right">
-            <span className="local-label">
-              <ShieldCheck size={14} />
-              Private & personal
-            </span>
-            <button
-              className="icon-btn"
-              aria-label="Search your workspace"
-              onClick={() => setModal({ type: "search" })}
-            >
-              <Search size={18} />
+              <LayoutGrid size={17} />
+              <span>All tasks</span>
             </button>
             <button
-              className="profile-avatar"
-              aria-label="Open profile settings"
+              className={`nav-item ${view === "Completed" ? "active" : ""}`}
+              onClick={() => go("Completed")}
+            >
+              <CheckCheck size={18} />
+              <span>Completed</span>
+            </button>
+          </nav>
+          <div className="sidebar-bottom">
+            <div className="install-card">
+              <div className="install-card-top">
+                <Monitor size={26} />
+                <span>
+                  YOUR LITTLE
+                  <br />
+                  DESKTOP COMPANION
+                </span>
+                <Sparkles size={18} />
+              </div>
+              <p>A brighter day, one click away.</p>
+              <button onClick={install}>
+                Install Daylight
+                <ArrowUpRight size={15} />
+              </button>
+            </div>
+            <button
+              className="nav-item settings-btn"
               onClick={() => setModal({ type: "settings" })}
             >
-              {profile.name[0].toUpperCase()}
+              <Settings size={18} />
+              <span>Settings & preferences</span>
             </button>
-          </div>
-        </header>
-        <main className="main-content">
-          <div className="page-heading">
-            <div>
-              <div className="page-eyebrow">
-                {view === "My day"
-                  ? new Date().toLocaleDateString("en", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "A LITTLE MORE CLARITY"}
-              </div>
-              <h1>
-                {view === "My day"
-                  ? `Hello, ${profile.name}`
-                  : currentProject?.name || view}
-                {view === "My day" && <span className="greeting-sun">✳</span>}
-              </h1>
-            </div>
-            <div className="heading-actions">
-              {currentProject && (
-                <button
-                  className="btn secondary"
-                  onClick={() =>
-                    setModal({ type: "project", project: currentProject })
-                  }
-                >
-                  <Pencil size={15} />
-                  Edit project
-                </button>
-              )}
-              <button className="btn dark" onClick={() => newTask()}>
-                <Plus size={18} />
-                Add task<kbd>N</kbd>
+            <div className="sidebar-foot">
+              <span>
+                <i />
+                Saved on this device
+              </span>
+              <button
+                className="icon-btn"
+                aria-label="Help and shortcuts"
+                onClick={() => setModal({ type: "help" })}
+              >
+                <CircleHelp size={16} />
               </button>
             </div>
           </div>
-          {view === "My day" && (
-            <>
-              <section className="day-hero">
-                <div className="hero-copy">
-                  <span className="eyebrow">
-                    <span className="tiny-sun">✳</span> A FRESH PERSPECTIVE
-                  </span>
-                  <h2>
-                    A little focus.
-                    <br />A <em>brighter</em> day.
-                  </h2>
-                  <p>
-                    You don’t have to do it all.
-                    <br />
-                    Just make room for what matters.
-                  </p>
+        </aside>
+      )}
+      {!isMobile && (
+        <div className="app-body">
+          <header className="topbar">
+            <div className="breadcrumb">
+              <button
+                className="icon-btn mobile-menu"
+                aria-label="Open menu"
+                onClick={() => setMobileNav(true)}
+              >
+                <Menu size={20} />
+              </button>
+              <span>My workspace</span>
+              <ChevronRight size={13} />
+              <b>{currentProject?.name || view}</b>
+            </div>
+            <div className="topbar-right">
+              <span className="local-label">
+                <ShieldCheck size={14} />
+                Private & personal
+              </span>
+              <button
+                className="icon-btn"
+                aria-label="Search your workspace"
+                onClick={() => setModal({ type: "search" })}
+              >
+                <Search size={18} />
+              </button>
+              <button
+                className="profile-avatar"
+                aria-label="Open profile settings"
+                onClick={() => setModal({ type: "settings" })}
+              >
+                {profile.name[0].toUpperCase()}
+              </button>
+            </div>
+          </header>
+          <main className="main-content">
+            <div className="page-heading">
+              <div>
+                <div className="page-eyebrow">
+                  {view === "My day"
+                    ? new Date().toLocaleDateString("en", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "A LITTLE MORE CLARITY"}
+                </div>
+                <h1>
+                  {view === "My day"
+                    ? `Hello, ${profile.name}`
+                    : currentProject?.name || view}
+                  {view === "My day" && <span className="greeting-sun">✳</span>}
+                </h1>
+              </div>
+              <div className="heading-actions">
+                {currentProject && (
                   <button
-                    onClick={() => {
-                      document
-                        .getElementById("plan")
-                        ?.scrollIntoView({
+                    className="btn secondary"
+                    onClick={() =>
+                      setModal({ type: "project", project: currentProject })
+                    }
+                  >
+                    <Pencil size={15} />
+                    Edit project
+                  </button>
+                )}
+                <button className="btn dark" onClick={() => newTask()}>
+                  <Plus size={18} />
+                  Add task<kbd>N</kbd>
+                </button>
+              </div>
+            </div>
+            {view === "My day" && (
+              <>
+                <section className="day-hero">
+                  <div className="hero-copy">
+                    <span className="eyebrow">
+                      <span className="tiny-sun">✳</span> A FRESH PERSPECTIVE
+                    </span>
+                    <h2>
+                      A little focus.
+                      <br />A <em>brighter</em> day.
+                    </h2>
+                    <p>
+                      You don’t have to do it all.
+                      <br />
+                      Just make room for what matters.
+                    </p>
+                    <button
+                      onClick={() => {
+                        document.getElementById("plan")?.scrollIntoView({
                           behavior: "smooth",
                           block: "start",
                         });
-                    }}
-                    className="hero-link"
-                  >
-                    Let’s make today a good one
-                    <ArrowUpRight size={16} />
-                  </button>
-                </div>
-                <div className="hero-art">
-                  <div className="hero-lavender" />
-                  <img
-                    src={photo("studio")}
-                    alt="Sunlit creative studio with a yellow chair and fresh daisies"
-                  />
-                  <Flower className="hero-flower" color="#e8b6d4" size={107} />
-                  <div className="hero-note">
-                    <span>
-                      <Check size={15} />
-                    </span>
-                    One thing at a time.
-                  </div>
-                  <span className="hero-scribble">grow at your own pace ↗</span>
-                </div>
-              </section>
-              <div className="day-stats">
-                <div>
-                  <span className="stat-icon yellow">
-                    <Sun size={21} />
-                  </span>
-                  <div>
-                    <span>On your list</span>
-                    <b>
-                      {activeToday}
-                      <small>tasks for today</small>
-                    </b>
-                  </div>
-                </div>
-                <div>
-                  <span className="stat-icon green">
-                    <CheckCheck size={21} />
-                  </span>
-                  <div>
-                    <span>Little wins</span>
-                    <b>
-                      {completedToday}
-                      <small>of {profile.goal} daily goal</small>
-                    </b>
-                  </div>
-                  <div className="mini-progress">
-                    <i
-                      style={{
-                        width: `${Math.min(100, (completedToday / profile.goal) * 100)}%`,
                       }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <span className="stat-icon purple">
-                    <Timer size={21} />
-                  </span>
-                  <div>
-                    <span>Time well spent</span>
-                    <b>
-                      {focusMinutes}
-                      <small>focused minutes</small>
-                    </b>
-                  </div>
-                </div>
-              </div>
-              <div className="dashboard-grid" id="plan">
-                <div className="dashboard-main">
-                  {overdue.length > 0 && (
-                    <div className="overdue-note">
-                      <Clock3 size={15} />
-                      {overdue.length} task{overdue.length > 1 ? "s" : ""}{" "}
-                      carried over. A fresh chance today.
-                    </div>
-                  )}
-                  {taskPanel}
-                  <div className="section-heading project-section-heading">
-                    <h2>Your little big plans</h2>
-                    <button className="text-btn" onClick={() => go("Projects")}>
-                      All projects
-                      <ArrowUpRight size={15} />
+                      className="hero-link"
+                    >
+                      Let’s make today a good one
+                      <ArrowUpRight size={16} />
                     </button>
                   </div>
-                  <div className="project-grid compact">
-                    {projects.slice(0, 3).map((p) => (
-                      <ProjectCard
-                        key={p.id}
-                        project={p}
-                        tasks={tasks}
-                        onClick={() => go(p.id)}
+                  <div className="hero-art">
+                    <div className="hero-lavender" />
+                    <img
+                      src={photo("studio")}
+                      alt="Sunlit creative studio with a yellow chair and fresh daisies"
+                    />
+                    <Flower
+                      className="hero-flower"
+                      color="#e8b6d4"
+                      size={107}
+                    />
+                    <div className="hero-note">
+                      <span>
+                        <Check size={15} />
+                      </span>
+                      One thing at a time.
+                    </div>
+                    <span className="hero-scribble">
+                      grow at your own pace ↗
+                    </span>
+                  </div>
+                </section>
+                <div className="day-stats">
+                  <div>
+                    <span className="stat-icon yellow">
+                      <Sun size={21} />
+                    </span>
+                    <div>
+                      <span>On your list</span>
+                      <b>
+                        {activeToday}
+                        <small>tasks for today</small>
+                      </b>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="stat-icon green">
+                      <CheckCheck size={21} />
+                    </span>
+                    <div>
+                      <span>Little wins</span>
+                      <b>
+                        {completedToday}
+                        <small>of {profile.goal} daily goal</small>
+                      </b>
+                    </div>
+                    <div className="mini-progress">
+                      <i
+                        style={{
+                          width: `${Math.min(100, (completedToday / profile.goal) * 100)}%`,
+                        }}
                       />
-                    ))}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="stat-icon purple">
+                      <Timer size={21} />
+                    </span>
+                    <div>
+                      <span>Time well spent</span>
+                      <b>
+                        {focusMinutes}
+                        <small>focused minutes</small>
+                      </b>
+                    </div>
                   </div>
                 </div>
-                <div className="dashboard-side">
-                  <FocusCard
-                    seconds={seconds}
-                    timer={timer}
-                    onToggle={startPause}
-                    onReset={() => resetTimer()}
-                    onOpen={() => go("Focus")}
-                  />
-                  <section className="habit-card">
-                    <div className="section-heading">
-                      <h2>Little rituals</h2>
-                      <button
-                        className="icon-btn"
-                        aria-label="All habits"
-                        onClick={() => go("Habits")}
-                      >
-                        <ArrowUpRight size={18} />
-                      </button>
-                    </div>
-                    <p>Good days start with small things.</p>
-                    {habits.length ? (
-                      habits.slice(0, 3).map((h) => (
-                        <button
-                          key={h.id}
-                          className={`habit-mini ${h.history.includes(today()) ? "done" : ""}`}
-                          onClick={() => toggleHabit(h.id)}
-                        >
-                          <span className="habit-icon">
-                            {h.icon === "book" ? (
-                              <BookOpen size={17} />
-                            ) : h.icon === "coffee" ? (
-                              <Coffee size={17} />
-                            ) : (
-                              <Leaf size={17} />
-                            )}
-                          </span>
-                          <span>{h.title}</span>
-                          <span className="habit-tick">
-                            {h.history.includes(today()) && <Check size={12} />}
-                          </span>
-                        </button>
-                      ))
-                    ) : (
+                <div className="dashboard-grid" id="plan">
+                  <div className="dashboard-main">
+                    {overdue.length > 0 && (
+                      <div className="overdue-note">
+                        <Clock3 size={15} />
+                        {overdue.length} task{overdue.length > 1 ? "s" : ""}{" "}
+                        carried over. A fresh chance today.
+                      </div>
+                    )}
+                    {taskPanel}
+                    <div className="section-heading project-section-heading">
+                      <h2>Your little big plans</h2>
                       <button
                         className="text-btn"
-                        onClick={() => setModal({ type: "habit" })}
+                        onClick={() => go("Projects")}
                       >
-                        <Plus size={16} />
-                        Create your first ritual
+                        All projects
+                        <ArrowUpRight size={15} />
                       </button>
-                    )}
-                  </section>
-                  <button
-                    className="daily-spark"
-                    onClick={() => setModal({ type: "reflection" })}
+                    </div>
+                    <div className="project-grid compact">
+                      {projects.slice(0, 3).map((p) => (
+                        <ProjectCard
+                          key={p.id}
+                          project={p}
+                          tasks={tasks}
+                          onClick={() => go(p.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="dashboard-side">
+                    <FocusCard
+                      seconds={seconds}
+                      timer={timer}
+                      onToggle={startPause}
+                      onReset={() => resetTimer()}
+                      onOpen={() => go("Focus")}
+                    />
+                    <section className="habit-card">
+                      <div className="section-heading">
+                        <h2>Little rituals</h2>
+                        <button
+                          className="icon-btn"
+                          aria-label="All habits"
+                          onClick={() => go("Habits")}
+                        >
+                          <ArrowUpRight size={18} />
+                        </button>
+                      </div>
+                      <p>Good days start with small things.</p>
+                      {habits.length ? (
+                        habits.slice(0, 3).map((h) => (
+                          <button
+                            key={h.id}
+                            className={`habit-mini ${h.history.includes(today()) ? "done" : ""}`}
+                            onClick={() => toggleHabit(h.id)}
+                          >
+                            <span className="habit-icon">
+                              {h.icon === "book" ? (
+                                <BookOpen size={17} />
+                              ) : h.icon === "coffee" ? (
+                                <Coffee size={17} />
+                              ) : (
+                                <Leaf size={17} />
+                              )}
+                            </span>
+                            <span>{h.title}</span>
+                            <span className="habit-tick">
+                              {h.history.includes(today()) && (
+                                <Check size={12} />
+                              )}
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <button
+                          className="text-btn"
+                          onClick={() => setModal({ type: "habit" })}
+                        >
+                          <Plus size={16} />
+                          Create your first ritual
+                        </button>
+                      )}
+                    </section>
+                    <button
+                      className="daily-spark"
+                      onClick={() => setModal({ type: "reflection" })}
+                    >
+                      <img
+                        src={photo("daisies")}
+                        alt="Daisies in the sunshine"
+                      />
+                      <span>
+                        <span className="eyebrow">A GENTLE REMINDER</span>
+                        <b>Progress, not perfection.</b>
+                        <small>
+                          A moment for yourself
+                          <ArrowUpRight size={14} />
+                        </small>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+            {(["Inbox", "Upcoming", "All tasks", "Completed"].includes(view) ||
+              currentProject) && (
+              <>
+                {currentProject && (
+                  <div
+                    className="project-banner"
+                    style={{ background: currentProject.color }}
                   >
-                    <img src={photo("daisies")} alt="Daisies in the sunshine" />
-                    <span>
-                      <span className="eyebrow">A GENTLE REMINDER</span>
-                      <b>Progress, not perfection.</b>
-                      <small>
-                        A moment for yourself
-                        <ArrowUpRight size={14} />
-                      </small>
-                    </span>
+                    <div>
+                      <span className="eyebrow">SPACE FOR WHAT MATTERS</span>
+                      <h2>
+                        {currentProject.desc || "One little step closer."}
+                      </h2>
+                      <p>
+                        {
+                          tasks.filter(
+                            (t) =>
+                              t.projectId === currentProject.id &&
+                              t.status === "done",
+                          ).length
+                        }{" "}
+                        completed ·{" "}
+                        {
+                          tasks.filter(
+                            (t) =>
+                              t.projectId === currentProject.id &&
+                              t.status !== "done",
+                          ).length
+                        }{" "}
+                        still to explore
+                      </p>
+                    </div>
+                    <img
+                      src={photo(currentProject.image)}
+                      alt={`${currentProject.name} project inspiration`}
+                    />
+                  </div>
+                )}
+                {view === "Inbox" && (
+                  <p className="view-intro">
+                    Get it out of your head. Give it a home later.
+                  </p>
+                )}
+                {taskPanel}
+              </>
+            )}
+            {view === "Projects" && (
+              <>
+                <div className="projects-intro">
+                  <p>
+                    For the things you’re working on. And the things you’re
+                    working toward.
+                  </p>
+                  <button
+                    className="btn secondary"
+                    onClick={() => setModal({ type: "project" })}
+                  >
+                    <Plus size={17} />
+                    New project
                   </button>
                 </div>
-              </div>
-            </>
-          )}
-          {(["Inbox", "Upcoming", "All tasks", "Completed"].includes(view) ||
-            currentProject) && (
-            <>
-              {currentProject && (
-                <div
-                  className="project-banner"
-                  style={{ background: currentProject.color }}
-                >
-                  <div>
-                    <span className="eyebrow">SPACE FOR WHAT MATTERS</span>
-                    <h2>{currentProject.desc || "One little step closer."}</h2>
-                    <p>
-                      {
-                        tasks.filter(
-                          (t) =>
-                            t.projectId === currentProject.id &&
-                            t.status === "done",
-                        ).length
-                      }{" "}
-                      completed ·{" "}
-                      {
-                        tasks.filter(
-                          (t) =>
-                            t.projectId === currentProject.id &&
-                            t.status !== "done",
-                        ).length
-                      }{" "}
-                      still to explore
-                    </p>
-                  </div>
-                  <img
-                    src={photo(currentProject.image)}
-                    alt={`${currentProject.name} project inspiration`}
-                  />
+                <div className="project-grid full">
+                  {projects.map((p) => (
+                    <ProjectCard
+                      key={p.id}
+                      project={p}
+                      tasks={tasks}
+                      onClick={() => go(p.id)}
+                    />
+                  ))}
+                  <button
+                    className="project-new"
+                    onClick={() => setModal({ type: "project" })}
+                  >
+                    <Plus size={27} />
+                    <b>Room for another idea</b>
+                    <span>Create a project</span>
+                  </button>
                 </div>
-              )}
-              {view === "Inbox" && (
-                <p className="view-intro">
-                  Get it out of your head. Give it a home later.
-                </p>
-              )}
-              {taskPanel}
-            </>
-          )}
-          {view === "Projects" && (
-            <>
-              <div className="projects-intro">
-                <p>
-                  For the things you’re working on. And the things you’re
-                  working toward.
-                </p>
-                <button
-                  className="btn secondary"
-                  onClick={() => setModal({ type: "project" })}
-                >
-                  <Plus size={17} />
-                  New project
-                </button>
-              </div>
-              <div className="project-grid full">
-                {projects.map((p) => (
-                  <ProjectCard
-                    key={p.id}
-                    project={p}
-                    tasks={tasks}
-                    onClick={() => go(p.id)}
-                  />
-                ))}
-                <button
-                  className="project-new"
-                  onClick={() => setModal({ type: "project" })}
-                >
-                  <Plus size={27} />
-                  <b>Room for another idea</b>
-                  <span>Create a project</span>
-                </button>
-              </div>
-            </>
-          )}
-          {view === "Calendar" && (
-            <CalendarView
-              tasks={tasks}
-              projects={projects}
-              onEdit={rowProps.onEdit}
-              onAdd={newTask}
-            />
-          )}
-          {view === "Focus" && (
-            <FocusView
-              seconds={seconds}
-              timer={timer}
-              tasks={tasks}
-              profile={profile}
-              onToggle={startPause}
-              onReset={resetTimer}
-              onSelect={(id) => setTimer((t) => ({ ...t, taskId: id }))}
-              sessions={data.sessions}
-            />
-          )}
-          {view === "Habits" && (
-            <HabitsView
-              habits={habits}
-              onToggle={toggleHabit}
-              onAdd={() => setModal({ type: "habit" })}
-              onEdit={(h) => setModal({ type: "habit", habit: h })}
-            />
-          )}
-          <footer className="main-footer">
-            <span>
-              <Sun size={13} /> Your pace. Your space.
-            </span>
-            <span>A little better, every day.</span>
-          </footer>
-        </main>
-      </div>
+              </>
+            )}
+            {view === "Calendar" && (
+              <CalendarView
+                tasks={tasks}
+                projects={projects}
+                onEdit={rowProps.onEdit}
+                onAdd={newTask}
+              />
+            )}
+            {view === "Focus" && (
+              <FocusView
+                seconds={seconds}
+                timer={timer}
+                tasks={tasks}
+                profile={profile}
+                onToggle={startPause}
+                onReset={resetTimer}
+                onSelect={(id) => setTimer((t) => ({ ...t, taskId: id }))}
+                sessions={data.sessions}
+              />
+            )}
+            {view === "Habits" && (
+              <HabitsView
+                habits={habits}
+                onToggle={toggleHabit}
+                onAdd={() => setModal({ type: "habit" })}
+                onEdit={(h) => setModal({ type: "habit", habit: h })}
+              />
+            )}
+            <footer className="main-footer">
+              <span>
+                <Sun size={13} /> Your pace. Your space.
+              </span>
+              <span>A little better, every day.</span>
+            </footer>
+          </main>
+        </div>
+      )}
+      {isMobile && (
+        <div className="app-body mobile-app-body">
+          <MobileExperience
+            data={data}
+            view={view}
+            onGo={go}
+            onModal={setModal}
+            onAdd={newTask}
+            onToggle={toggleTask}
+            onEdit={rowProps.onEdit}
+            onFocus={startTaskFocus}
+            onHabit={toggleHabit}
+            onMood={(mood) =>
+              update((d) => ({ ...d, moods: { ...d.moods, [today()]: mood } }))
+            }
+            selected={mobileDay}
+            onSelect={setMobileDay}
+            recent={celebration.recent}
+            completed={completedToday}
+            focusMinutes={focusMinutes}
+            timer={timer}
+            seconds={seconds}
+            renderBoard={(items) => (
+              <Board tasks={items} {...rowProps} setStatus={setTaskStatus} />
+            )}
+            renderFocus={() => (
+              <FocusView
+                seconds={seconds}
+                timer={timer}
+                tasks={tasks}
+                profile={profile}
+                onToggle={startPause}
+                onReset={resetTimer}
+                onSelect={(id) => setTimer((t) => ({ ...t, taskId: id }))}
+                sessions={data.sessions}
+              />
+            )}
+          />
+        </div>
+      )}
+      {modal?.type === "browse" && (
+        <Modal title="Browse your workspace" onClose={() => setModal(null)}>
+          <MobileBrowse
+            data={data}
+            onGo={(v) => {
+              setModal(null);
+              go(v);
+            }}
+            onModal={setModal}
+          />
+        </Modal>
+      )}
+      <CompletionEffects bursts={celebration.bursts} />
       {modal?.type === "task" && (
         <TaskEditor
           task={modal.task}
@@ -1941,13 +2054,23 @@ function Empty({ icon: Icon, title, text }) {
     </div>
   );
 }
-function TaskRow({ task: t, projects, onToggle, onEdit, onFocus }) {
+function TaskRow({
+  task: t,
+  projects,
+  onToggle,
+  onEdit,
+  onFocus,
+  recent = [],
+}) {
   const p = projects.find((p) => p.id === t.projectId);
   return (
-    <div className={`task-row ${t.status === "done" ? "completed" : ""}`}>
+    <div
+      className={`task-row ${t.status === "done" ? "completed" : ""} ${recent.includes(t.id) ? "just-completed" : ""}`}
+    >
       <button
         className={`task-check ${t.priority}`}
-        onClick={() => onToggle(t)}
+        onClick={(e) => onToggle(t, e.currentTarget)}
+        disabled={recent.includes(t.id)}
         aria-label={`${t.status === "done" ? "Reopen" : "Complete"} ${t.title}`}
       >
         {t.status === "done" && <Check size={13} />}
@@ -2008,7 +2131,15 @@ function TaskRow({ task: t, projects, onToggle, onEdit, onFocus }) {
     </div>
   );
 }
-function Board({ tasks, projects, onEdit, onToggle, onFocus, setStatus }) {
+function Board({
+  tasks,
+  projects,
+  onEdit,
+  onToggle,
+  onFocus,
+  setStatus,
+  recent = [],
+}) {
   return (
     <div className="board">
       {[
@@ -2034,7 +2165,7 @@ function Board({ tasks, projects, onEdit, onToggle, onFocus, setStatus }) {
             .filter((t) => t.status === status)
             .map((t) => (
               <article
-                className="board-task"
+                className={`board-task ${recent.includes(t.id) ? "just-completed" : ""}`}
                 key={t.id}
                 draggable
                 onDragStart={(e) => e.dataTransfer.setData("text/plain", t.id)}
@@ -2051,7 +2182,9 @@ function Board({ tasks, projects, onEdit, onToggle, onFocus, setStatus }) {
                 <select
                   aria-label={`Status of ${t.title}`}
                   value={t.status}
-                  onChange={(e) => setStatus(t.id, e.target.value)}
+                  onChange={(e) =>
+                    setStatus(t.id, e.target.value, e.currentTarget)
+                  }
                 >
                   <option value="todo">To do</option>
                   <option value="doing">In progress</option>
@@ -3126,6 +3259,27 @@ function validWorkspace(d) {
     Object.hasOwn(themes, d.profile.theme) &&
     [15, 25, 50].includes(d.profile.focus) &&
     [3, 5, 8].includes(d.profile.goal) &&
+    (d.profile.celebrations === undefined ||
+      typeof d.profile.celebrations === "boolean") &&
+    (d.profile.solidNav === undefined ||
+      typeof d.profile.solidNav === "boolean") &&
+    (d.moods === undefined ||
+      (d.moods !== null &&
+        typeof d.moods === "object" &&
+        !Array.isArray(d.moods) &&
+        Object.entries(d.moods).every(
+          ([key, value]) =>
+            /^\d{4}-\d{2}-\d{2}$/.test(key) &&
+            ["low", "tired", "okay", "good", "great"].includes(value),
+        ))) &&
+    (d.reflections === undefined ||
+      (d.reflections !== null &&
+        typeof d.reflections === "object" &&
+        !Array.isArray(d.reflections) &&
+        Object.entries(d.reflections).every(
+          ([key, value]) =>
+            /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof value === "string",
+        ))) &&
     Array.isArray(d.projects) &&
     d.projects.every(
       (p) =>
@@ -3276,6 +3430,35 @@ function SettingsModal({ data, onClose, onSave, onImport, notify }) {
             </button>
           ))}
         </div>
+        <div className="comfort-settings">
+          <label>
+            <span>
+              <b>Celebrate the little wins</b>
+              <small>
+                A brief checkmark pop and a little confetti. Respects Reduce
+                Motion.
+              </small>
+            </span>
+            <input
+              type="checkbox"
+              checked={p.celebrations !== false}
+              onChange={(e) => setP({ ...p, celebrations: e.target.checked })}
+            />
+          </label>
+          <label>
+            <span>
+              <b>Solid mobile navigation</b>
+              <small>
+                Prefer less transparency? Give your dock a solid background.
+              </small>
+            </span>
+            <input
+              type="checkbox"
+              checked={!!p.solidNav}
+              onChange={(e) => setP({ ...p, solidNav: e.target.checked })}
+            />
+          </label>
+        </div>
         <div className="settings-data">
           <h3>A little peace of mind.</h3>
           <p>
@@ -3389,6 +3572,8 @@ function Reflection({ value, onSave, onClose }) {
 createRoot(document.getElementById("root")).render(<App />);
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () =>
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {}),
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`)
+      .catch(() => {}),
   );
 }
