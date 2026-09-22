@@ -55,6 +55,8 @@ import {
 } from "lucide-react";
 import "./fonts.css";
 import "./style.css";
+import SetupJourney from "./Journey.jsx";
+import MoodSpace from "./MoodSpace.jsx";
 import MobileExperience, { MobileBrowse } from "./Mobile.jsx";
 import { useMedia, useTaskCelebration, CompletionEffects } from "./motion.jsx";
 
@@ -363,363 +365,22 @@ function Modal({ children, onClose, title, wide = false }) {
   );
 }
 function Onboarding({ onFinish }) {
-  const [step, setStep] = useState(0),
-    [p, setP] = useState(defaultProfile);
-  const upd = (key, value) => setP((prev) => ({ ...prev, [key]: value }));
-  const titles = [
-    "Good days start here.",
-    "Make space for what matters.",
-    "Find your own rhythm.",
-    "Make yourself at home.",
-  ];
   return (
-    <div
-      className={`onboarding theme-${p.theme} onboarding-step-${step}`}
-      style={{ "--accent": themes[p.theme].color }}
-    >
-      <header className="onboard-header">
-        <Brand />
-        <span className="small muted">
-          <ShieldCheck size={15} /> A personal space. Just for you.
-        </span>
-      </header>
-      <main className="onboard-layout">
-        <section className="onboard-form">
-          <div className="step-track">
-            {[
-              "A little about you",
-              "Your space",
-              "Your rhythm",
-              "Your vibe",
-            ].map((s, i) => (
-              <React.Fragment key={s}>
-                <button
-                  disabled={i > step}
-                  onClick={() => setStep(i)}
-                  className={i <= step ? "current" : ""}
-                >
-                  <span>
-                    {i < step ? (
-                      <Check size={12} />
-                    ) : (
-                      String(i + 1).padStart(2, "0")
-                    )}
-                  </span>
-                  <b>{s}</b>
-                </button>
-                {i < 3 && <i />}
-              </React.Fragment>
-            ))}
-          </div>
-          <div className="onboard-question" key={step}>
-            <span className="eyebrow">
-              LET’S MAKE THIS YOURS · 0{step + 1} / 04
-            </span>
-            <h1>{titles[step]}</h1>
-            {step === 0 && (
-              <>
-                <p>
-                  A clearer head. A little more focus. A day that feels like
-                  you.
-                  <br />
-                  First, let’s get to know each other.
-                </p>
-                <label className="field-label" htmlFor="first-name">
-                  What should we call you?
-                </label>
-                <input
-                  id="first-name"
-                  autoFocus
-                  className="name-input"
-                  placeholder="Your first name"
-                  value={p.name}
-                  maxLength={35}
-                  onChange={(e) => upd("name", e.target.value)}
-                />
-                <label className="field-label">
-                  What brings you to Daylight?
-                </label>
-                <div className="purpose-options">
-                  {[
-                    ["Work & projects", BriefcaseBusiness],
-                    ["Everyday life", Heart],
-                    ["A little of both", Sparkles],
-                  ].map(([name, Icon]) => (
-                    <button
-                      key={name}
-                      className={`choice ${p.purpose === name ? "selected" : ""}`}
-                      onClick={() => {
-                        upd("purpose", name);
-                        upd(
-                          "areas",
-                          name === "Work & projects"
-                            ? ["Work", "Learning", "Creative"]
-                            : name === "Everyday life"
-                              ? ["Personal", "Wellbeing", "Travel"]
-                              : defaultProfile.areas,
-                        );
-                      }}
-                    >
-                      <Icon size={21} />
-                      <span>{name}</span>
-                      <span className="radio">
-                        {p.purpose === name && <span />}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <div className="quiet-note">
-                  <Sparkles size={15} /> We’ll tailor your starting projects to
-                  fit your life.
-                </div>
-              </>
-            )}
-            {step === 1 && (
-              <>
-                <p>
-                  Pick the parts of life you’d like to organize.
-                  <br />
-                  We’ll turn these into your first projects.
-                </p>
-                <div className="areas-grid">
-                  {AREAS.map((a) => (
-                    <button
-                      className={`area-choice ${p.areas.includes(a.name) ? "selected" : ""}`}
-                      key={a.name}
-                      onClick={() =>
-                        upd(
-                          "areas",
-                          p.areas.includes(a.name)
-                            ? p.areas.filter((x) => x !== a.name)
-                            : [...p.areas, a.name],
-                        )
-                      }
-                    >
-                      <span
-                        className="area-icon"
-                        style={{ background: a.color }}
-                      >
-                        <a.icon size={22} />
-                      </span>
-                      <b>{a.name}</b>
-                      <span>{a.desc}</span>
-                      <span className="area-check">
-                        {p.areas.includes(a.name) ? (
-                          <CheckCircle2 size={18} />
-                        ) : (
-                          <Circle size={18} />
-                        )}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <div className="quiet-note">
-                  <LayoutGrid size={15} /> Add, rename, or change your projects
-                  anytime.
-                </div>
-              </>
-            )}
-            {step === 2 && (
-              <>
-                <p>
-                  Big progress starts with a manageable day.
-                  <br />
-                  Let’s keep your goals kind and realistic.
-                </p>
-                <label className="field-label">
-                  What feels like a good daily task goal?
-                </label>
-                <div className="rhythm-choices">
-                  {[
-                    [3, "Easy does it"],
-                    [5, "A steady flow"],
-                    [8, "Feeling ambitious"],
-                  ].map(([n, s]) => (
-                    <button
-                      className={`choice ${p.goal === n ? "selected" : ""}`}
-                      key={n}
-                      onClick={() => upd("goal", n)}
-                    >
-                      <strong>
-                        {n}
-                        <small> tasks</small>
-                      </strong>
-                      <span>{s}</span>
-                    </button>
-                  ))}
-                </div>
-                <label className="field-label">
-                  How long do you like to focus?
-                </label>
-                <div className="rhythm-choices">
-                  {[
-                    [15, "A quick win"],
-                    [25, "The classic"],
-                    [50, "Deep work"],
-                  ].map(([n, s]) => (
-                    <button
-                      className={`choice ${p.focus === n ? "selected" : ""}`}
-                      key={n}
-                      onClick={() => upd("focus", n)}
-                    >
-                      <strong>
-                        {n}
-                        <small> min</small>
-                      </strong>
-                      <span>{s}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="quiet-note">
-                  <Leaf size={15} /> Your goal and timer are here to help, not
-                  to hurry you.
-                </div>
-              </>
-            )}
-            {step === 3 && (
-              <>
-                <p>
-                  A space you love coming back to.
-                  <br />
-                  Choose a little color for your everyday.
-                </p>
-                <div className="theme-choices">
-                  {Object.entries(themes).map(([key, t]) => (
-                    <button
-                      key={key}
-                      className={`theme-choice ${p.theme === key ? "selected" : ""}`}
-                      onClick={() => upd("theme", key)}
-                    >
-                      <div
-                        className="theme-preview"
-                        style={{ background: t.color }}
-                      >
-                        <div />
-                        <span />
-                        <i />
-                        <b>{p.theme === key && <Check size={18} />}</b>
-                      </div>
-                      <strong>{t.name}</strong>
-                      <small>{t.desc}</small>
-                    </button>
-                  ))}
-                </div>
-                <label className="example-toggle">
-                  <input
-                    type="checkbox"
-                    checked={p.examples}
-                    onChange={(e) => upd("examples", e.target.checked)}
-                  />
-                  <span>
-                    <b>Give me a little inspiration</b>
-                    <small>
-                      Add editable starter tasks and three everyday rituals.
-                    </small>
-                  </span>
-                </label>
-                <div className="quiet-note">
-                  <ShieldCheck size={15} /> No sign-up. Your workspace stays in
-                  this browser.
-                </div>
-              </>
-            )}
-          </div>
-          <div className="onboard-actions">
-            {step > 0 ? (
-              <button className="text-btn" onClick={() => setStep(step - 1)}>
-                <ChevronLeft size={16} />
-                Back
-              </button>
-            ) : (
-              <span className="small muted">
-                A fresh start in about a minute.
-              </span>
-            )}
-            <button
-              className="btn dark"
-              disabled={step === 1 && !p.areas.length}
-              onClick={() =>
-                step < 3
-                  ? setStep(step + 1)
-                  : onFinish({ ...p, name: p.name.trim() || "friend" })
-              }
-            >
-              {step === 3 ? "Let the good days begin" : "Continue"}
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        </section>
-        <aside className="onboard-art">
-          <img
-            className="mobile-onboard-art"
-            src={photo(
-              step === 0 || step === 2
-                ? "focus-sculpture"
-                : step === 1
-                  ? "mindful-morning"
-                  : "slow-moments",
-            )}
-            alt="A little inspiration for your personal space"
-          />
-          <span className="art-top">LESS BUSY. MORE INTENTIONAL.</span>
-          <h2>
-            A little focus.
-            <br />A <em>brighter</em> day.
-          </h2>
-          <div className="onboard-collage">
-            <div className="collage-lavender" />
-            <img
-              className="collage-photo"
-              src={photo("studio")}
-              alt="A sunlit studio with daisies, a yellow chair and plants"
-            />
-            <img
-              className="collage-daisy"
-              src={photo("daisies")}
-              alt="White daisies reaching toward a blue sky"
-            />
-            <Flower className="collage-flower" color="#c1cc8e" size={115} />
-            <div className="floating-task">
-              <span>
-                <Check size={19} />
-              </span>
-              <div>
-                Make time for what matters
-                <small>One little step at a time</small>
-              </div>
-              <Sparkles size={18} />
-            </div>
-            <div className="floating-label">
-              a fresh perspective <ArrowUpRight size={15} />
-            </div>
-          </div>
-          <div className="art-footer">
-            <span className="sun-small">
-              <Sun size={23} />
-            </span>
-            <p>
-              For your big plans.
-              <br />
-              And your everyday little things.
-            </p>
-            <span className="art-pagination">
-              0{step + 1}
-              <span> / 04</span>
-            </span>
-          </div>
-        </aside>
-      </main>
-      <footer className="onboard-footer">
-        <span>Made for a more mindful kind of productive.</span>
-        <span>YOUR PACE. YOUR SPACE.</span>
-      </footer>
-    </div>
+    <SetupJourney
+      initialProfile={defaultProfile}
+      areas={AREAS}
+      themes={themes}
+      onFinish={onFinish}
+    />
   );
 }
 
 function App() {
   const isMobile = useMedia("(max-width: 767px)");
   const [mobileDay, setMobileDay] = useState(today);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [isMobile]);
   const [data, setData] = useState(load),
     [view, setView] = useState("My day"),
     [modal, setModal] = useState(null),
@@ -749,9 +410,7 @@ function App() {
     }
   });
   const celebration = useTaskCelebration(data?.profile?.celebrations !== false);
-  useEffect(() => {
-    if (!isMobile && view === "You") setView("My day");
-  }, [isMobile, view]);
+
   const toastTimer = useRef();
   const notify = (text, action = null) => {
     clearTimeout(toastTimer.current);
@@ -858,6 +517,19 @@ function App() {
     );
   const { profile, projects, tasks, habits } = data;
   const update = (fn) => setData((d) => fn(d));
+  const saveMood = (entry, day) =>
+    update((d) => {
+      const moods = { ...d.moods },
+        moodDetails = { ...d.moodDetails };
+      if (entry) {
+        moods[day] = entry.mood;
+        moodDetails[day] = { note: entry.note, tags: entry.tags, at: entry.at };
+      } else {
+        delete moods[day];
+        delete moodDetails[day];
+      }
+      return { ...d, moods, moodDetails };
+    });
   const go = (v) => {
     setView(v);
     setMobileNav(false);
@@ -1232,7 +904,7 @@ function App() {
   );
   return (
     <div
-      className={`app theme-${profile.theme} ${profile.celebrations === false ? "less-motion" : ""} ${isMobile ? "mobile-app" : "desktop-app"}`}
+      className={`app theme-${profile.theme} ${profile.celebrations === false ? "less-motion" : ""} ${isMobile ? "mobile-app" : "desktop-app"} ${view === "My day" ? "home-enter" : ""}`}
       style={{
         "--accent": themes[profile.theme]?.color || themes.sunshine.color,
       }}
@@ -1276,6 +948,7 @@ function App() {
               ["Calendar", Calendar, null],
               ["Focus", Timer, null],
               ["Habits", Leaf, null],
+              ["You", Heart, null],
             ].map(([name, Icon, count]) => (
               <button
                 key={name}
@@ -1425,7 +1098,9 @@ function App() {
                 <h1>
                   {view === "My day"
                     ? `Hello, ${profile.name}`
-                    : currentProject?.name || view}
+                    : view === "You"
+                      ? "A little space for you."
+                      : currentProject?.name || view}
                   {view === "My day" && <span className="greeting-sun">✳</span>}
                 </h1>
               </div>
@@ -1452,7 +1127,10 @@ function App() {
                 <section className="day-hero">
                   <div className="hero-copy">
                     <span className="eyebrow">
-                      <span className="tiny-sun">✳</span> A FRESH PERSPECTIVE
+                      <span className="tiny-sun">✳</span>{" "}
+                      {profile.routine && profile.routine !== "Anytime"
+                        ? `YOUR ${profile.routine.toUpperCase()} MOMENT`
+                        : "A FRESH PERSPECTIVE"}
                     </span>
                     <h2>
                       A little focus.
@@ -1758,6 +1436,11 @@ function App() {
                 onEdit={(h) => setModal({ type: "habit", habit: h })}
               />
             )}
+            {view === "You" && (
+              <div className="desktop-feelings">
+                <MoodSpace data={data} onMood={saveMood} />
+              </div>
+            )}
             <footer className="main-footer">
               <span>
                 <Sun size={13} /> Your pace. Your space.
@@ -1779,9 +1462,7 @@ function App() {
             onEdit={rowProps.onEdit}
             onFocus={startTaskFocus}
             onHabit={toggleHabit}
-            onMood={(mood) =>
-              update((d) => ({ ...d, moods: { ...d.moods, [today()]: mood } }))
-            }
+            onMood={saveMood}
             selected={mobileDay}
             onSelect={setMobileDay}
             recent={celebration.recent}
@@ -3280,6 +2961,38 @@ function validWorkspace(d) {
           ([key, value]) =>
             /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof value === "string",
         ))) &&
+    (d.profile.routine === undefined ||
+      ["Morning", "Afternoon", "Evening", "Anytime"].includes(
+        d.profile.routine,
+      )) &&
+    (d.moodDetails === undefined ||
+      (d.moodDetails !== null &&
+        typeof d.moodDetails === "object" &&
+        !Array.isArray(d.moodDetails) &&
+        Object.entries(d.moodDetails).every(
+          ([k, v]) =>
+            /^\d{4}-\d{2}-\d{2}$/.test(k) &&
+            v &&
+            typeof v.note === "string" &&
+            v.note.length <= 1000 &&
+            Array.isArray(v.tags) &&
+            v.tags.length <= 9 &&
+            v.tags.every((t) =>
+              [
+                "Work",
+                "Rest",
+                "Movement",
+                "People",
+                "Sleep",
+                "Outdoors",
+                "Creativity",
+                "Learning",
+                "Quiet time",
+              ].includes(t),
+            ) &&
+            typeof v.at === "number" &&
+            Number.isFinite(v.at),
+        ))) &&
     Array.isArray(d.projects) &&
     d.projects.every(
       (p) =>
@@ -3415,6 +3128,24 @@ function SettingsModal({ data, onClose, onSave, onImport, notify }) {
             </select>
           </label>
         </div>
+        <label className="field-label" htmlFor="focus-routine">
+          Your focus moment
+        </label>
+        <select
+          id="focus-routine"
+          style={{
+            width: "100%",
+            marginBottom: 20,
+            padding: 12,
+            borderRadius: 12,
+          }}
+          value={p.routine || "Anytime"}
+          onChange={(e) => setP({ ...p, routine: e.target.value })}
+        >
+          {["Morning", "Afternoon", "Evening", "Anytime"].map((r) => (
+            <option key={r}>{r}</option>
+          ))}
+        </select>
         <label className="field-label">Your everyday palette</label>
         <div className="settings-themes">
           {Object.entries(themes).map(([id, t]) => (

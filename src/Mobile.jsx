@@ -33,6 +33,9 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import "./mobile.css";
+import GlassNav from "./GlassNav.jsx";
+import MoodSpace from "./MoodSpace.jsx";
+import "./experience.css";
 const photo = (n) => `${import.meta.env.BASE_URL}images/${n}.jpg`;
 const dayKey = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -379,7 +382,9 @@ function MobileHome({
         <div className="m-hero-copy">
           <span>
             <Sparkles size={12} />
-            SMALL STEPS, BIG FEELINGS
+            {data.profile.routine && data.profile.routine !== "Anytime"
+              ? `YOUR ${data.profile.routine.toUpperCase()} MOMENT`
+              : "SMALL STEPS, BIG FEELINGS"}
           </span>
           <h2>
             Your daily
@@ -418,10 +423,12 @@ function MobileHome({
       <div className="m-plan-summary">
         <span>
           {active.length
-            ? `${active.length} little steps. You’ve got this.`
+            ? `${active.length} little ${active.length === 1 ? "step" : "steps"}. You’ve got this.`
             : "A little space for something good."}
         </span>
-        <span className="m-count">{active.length} tasks</span>
+        <span className="m-count">
+          {active.length} {active.length === 1 ? "task" : "tasks"}
+        </span>
       </div>
       {planned.length ? (
         <>
@@ -971,33 +978,7 @@ function MobileYou({ data, onModal, onGo, onMood, completed, focusMinutes }) {
   const total = counts.reduce((a, b) => a + b, 0);
   return (
     <div className="m-you">
-      <section className="m-check-in">
-        <span className="m-kicker">A LITTLE CHECK-IN</span>
-        <h2>
-          How are you
-          <br />
-          feeling today?
-        </h2>
-        <div className="m-moods">
-          {MOODS.map(([id, name]) => (
-            <button
-              key={id}
-              className={mood === id ? "selected" : ""}
-              aria-pressed={mood === id}
-              onClick={() => onMood(id)}
-            >
-              <MoodFace mood={id} size={42} />
-              <span>{name}</span>
-              {mood === id && <Check size={11} />}
-            </button>
-          ))}
-        </div>
-        <p aria-live="polite">
-          {mood
-            ? `Feeling ${mood}. Noted with care.`
-            : "However you’re feeling, you belong here."}
-        </p>
-      </section>
+      <MoodSpace data={data} onMood={onMood} />
       <SectionTitle title="Your week in little wins" />
       <section className="m-weekly-wins">
         <div className="m-wins-top">
@@ -1178,49 +1159,6 @@ export function MobileBrowse({ data, onGo, onModal }) {
     </div>
   );
 }
-function GlassDock({ view, onGo, onAdd, timer, solid }) {
-  const active =
-    view === "My day"
-      ? 0
-      : view === "Focus"
-        ? 3
-        : ["You", "Habits"].includes(view)
-          ? 4
-          : 1;
-  return (
-    <div className={`m-dock-wrap ${solid ? "solid-glass" : ""}`}>
-      <nav
-        className="glass-dock"
-        aria-label="Mobile navigation"
-        style={{ "--active": active }}
-      >
-        <span className="glass-sheen" />
-        <span className="glass-selection" />
-        {[
-          ["My day", "Home", Home],
-          ["All tasks", "Plan", CalendarDays],
-          ["add", "Add", Plus],
-          ["Focus", "Focus", Timer],
-          ["You", "You", Heart],
-        ].map(([id, label, Icon], i) => (
-          <button
-            key={id}
-            aria-label={id === "add" ? "Add a task" : label}
-            aria-current={active === i ? "page" : undefined}
-            className={`${id === "add" ? "dock-add" : ""} ${active === i ? "active" : ""}`}
-            onClick={() => (id === "add" ? onAdd() : onGo(id))}
-          >
-            <span>
-              <Icon size={21} strokeWidth={active === i ? 2.15 : 1.7} />
-              {id === "Focus" && timer.running && <i />}
-            </span>
-            {id !== "add" && <small>{label}</small>}
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
-}
 export default function MobileExperience({
   data,
   view,
@@ -1371,7 +1309,7 @@ export default function MobileExperience({
           <ArrowUpRight size={14} />
         </button>
       )}
-      <GlassDock
+      <GlassNav
         view={view}
         onGo={onGo}
         onAdd={() =>
