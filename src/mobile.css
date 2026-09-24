@@ -2983,3 +2983,40 @@
     font-weight: 400;
   }
 }
+
+/* Harmonious mobile project artwork & styling */
+.m-project-strip > button {
+  position: relative;
+  background: var(--ui-surface, #fff);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.m-project-strip > button:active {
+  transform: scale(0.97);
+}
+.m-project-strip .project-photo-wrapper {
+  position: relative;
+  height: 104px;
+  width: 100%;
+  overflow: hidden;
+  background: var(--ui-raised, #f0f2eb);
+}
+.m-project-strip .project-photo-wrapper img {
+  position: relative;
+  z-index: 2;
+  mix-blend-mode: multiply;
+  opacity: 0.88;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.app.theme-midnight .m-project-strip .project-photo-wrapper img {
+  mix-blend-mode: luminosity;
+  opacity: 0.65;
+}
+.m-project-strip .project-svg-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

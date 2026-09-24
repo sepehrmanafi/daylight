@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import {
   Sun,
+  Moon,
   ArrowRight,
   ArrowLeft,
   Check,
@@ -11,6 +12,9 @@ import {
   Timer,
   Target,
 } from "lucide-react";
+import { themeVars, useThemeChrome } from "./themes.js";
+import ThemePreview from "./ThemePreview.jsx";
+import InteractiveSlider from "./InteractiveSlider.jsx";
 const image = (n) => `${import.meta.env.BASE_URL}images/${n}.jpg`;
 export function useSwipe(onNext, onBack) {
   const start = useRef(null);
@@ -127,10 +131,16 @@ export default function SetupJourney({
     () => change(step - 1),
   );
   const story = stories[step];
+  useThemeChrome(step === 3 ? p.theme : "sunshine");
   return (
     <div
-      className="setup-journey"
-      style={{ "--story-color": story.color, "--journey-dir": direction }}
+      className={`setup-journey ${step === 3 ? "is-palette-step" : ""}`}
+      data-theme={step === 3 ? p.theme : undefined}
+      style={{
+        ...themeVars(p.theme),
+        "--story-color": step === 3 ? themes[p.theme].tokens.hero : story.color,
+        "--journey-dir": direction,
+      }}
     >
       <header className="journey-header">
         <div className="journey-brand">
@@ -177,20 +187,34 @@ export default function SetupJourney({
         >
           <section className="journey-poster">
             <div className="journey-art">
-              <img
-                src={image(story.art)}
-                className={step < 2 ? "journey-cutout" : ""}
-                draggable={false}
-                alt={
-                  step === 0
-                    ? "An illustrated person making space for a new idea"
-                    : step === 1
-                      ? "An illustrated person reflecting in a colorful armchair"
-                      : step === 2
-                        ? "Playful balancing shapes"
-                        : "A sunlit path through gentle green hills"
-                }
-              />
+              {step === 3 && p.theme === "midnight" ? (
+                <div
+                  className="night-illustration"
+                  aria-label="A quiet moonlit sky"
+                >
+                  <Moon size={115} strokeWidth={0.9} />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <span>A little calm. A softer glow.</span>
+                </div>
+              ) : (
+                <img
+                  src={image(story.art)}
+                  className={step < 2 ? "journey-cutout" : ""}
+                  draggable={false}
+                  alt={
+                    step === 0
+                      ? "An illustrated person making space for a new idea"
+                      : step === 1
+                        ? "An illustrated person reflecting in a colorful armchair"
+                        : step === 2
+                          ? "Playful balancing shapes"
+                          : "A sunlit path through gentle green hills"
+                  }
+                />
+              )}
               <span className="journey-orbit">
                 <Sparkles size={23} />
               </span>
@@ -315,50 +339,34 @@ export default function SetupJourney({
             {step === 2 && (
               <>
                 <fieldset>
-                  <legend>What feels like a good daily task goal?</legend>
-                  <div className="journey-choice-row">
-                    {[
-                      [3, "Easy does it"],
-                      [5, "A steady flow"],
-                      [8, "Feeling ambitious"],
-                    ].map(([n, s]) => (
-                      <button
-                        key={n}
-                        aria-pressed={p.goal === n}
-                        className={p.goal === n ? "selected" : ""}
-                        onClick={() => upd("goal", n)}
-                      >
-                        <strong>
-                          {n}
-                          <small> tasks</small>
-                        </strong>
-                        <span>{s}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <legend className="sr-only">What feels like a good daily task goal?</legend>
+                  <InteractiveSlider
+                    label="Daily little wins goal"
+                    value={p.goal}
+                    unit="tasks"
+                    ariaLabel="Daily task goal slider"
+                    onChange={(val) => upd("goal", val)}
+                    options={[
+                      { value: 3, desc: "Easy does it" },
+                      { value: 5, desc: "A steady flow" },
+                      { value: 8, desc: "Feeling ambitious" },
+                    ]}
+                  />
                 </fieldset>
                 <fieldset>
-                  <legend>How much time can you give one thing?</legend>
-                  <div className="journey-choice-row">
-                    {[
-                      [15, "A quick reset"],
-                      [25, "A little focus"],
-                      [50, "Deep work"],
-                    ].map(([n, s]) => (
-                      <button
-                        key={n}
-                        aria-pressed={p.focus === n}
-                        className={p.focus === n ? "selected" : ""}
-                        onClick={() => upd("focus", n)}
-                      >
-                        <strong>
-                          {n}
-                          <small> min</small>
-                        </strong>
-                        <span>{s}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <legend className="sr-only">How much time can you give one thing?</legend>
+                  <InteractiveSlider
+                    label="Focus rhythm"
+                    value={p.focus}
+                    unit="min"
+                    ariaLabel="Focus duration slider"
+                    onChange={(val) => upd("focus", val)}
+                    options={[
+                      { value: 15, desc: "A quick reset" },
+                      { value: 25, desc: "A little focus" },
+                      { value: 50, desc: "Deep work" },
+                    ]}
+                  />
                 </fieldset>
                 <fieldset>
                   <legend>When does a little focus fit your day?</legend>
@@ -390,12 +398,21 @@ export default function SetupJourney({
                     {Object.entries(themes).map(([id, t]) => (
                       <button
                         key={id}
-                        style={{ "--swatch": t.color }}
+                        style={{
+                          "--swatch": t.mode === "dark" ? "#242938" : t.color,
+                        }}
+                        data-theme-option={id}
                         aria-pressed={p.theme === id}
                         className={p.theme === id ? "selected" : ""}
                         onClick={() => upd("theme", id)}
                       >
-                        <i>{p.theme === id && <Check size={17} />}</i>
+                        <i>
+                          {p.theme === id ? (
+                            <Check size={17} />
+                          ) : t.mode === "dark" ? (
+                            <Moon size={17} />
+                          ) : null}
+                        </i>
                         <span>
                           {t.name}
                           <small>{t.desc}</small>
@@ -404,6 +421,7 @@ export default function SetupJourney({
                     ))}
                   </div>
                 </fieldset>
+                <ThemePreview value={p.theme} />
                 <div className="journey-recap">
                   <span>
                     <Target size={18} />

@@ -1,0 +1,1207 @@
+/* Daylight palettes: one semantic token system for desktop, mobile and every dialog. */
+html[data-theme="sunshine"],
+html[data-theme="sunshine"] body {
+  background: #fff9ed;
+}
+html[data-theme="blossom"],
+html[data-theme="blossom"] body {
+  background: #fcf1f7;
+}
+html[data-theme="sage"],
+html[data-theme="sage"] body {
+  background: #eef5e9;
+}
+html[data-theme="midnight"],
+html[data-theme="midnight"] body {
+  background: #141820;
+  color-scheme: dark;
+}
+.app[data-theme],
+.setup-journey.is-palette-step {
+  --ink: var(--ui-text);
+  --muted: var(--ui-muted);
+  --line: var(--ui-line);
+  --accent: var(--ui-accent);
+  --cream: var(--ui-bg);
+  --green: var(--ui-soft);
+  --purple: var(--ui-raised);
+  --pink: var(--ui-raised);
+  --pocket-bg: var(--ui-bg);
+  --pocket-ink: var(--ui-text);
+  --pocket-muted: var(--ui-muted);
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  accent-color: var(--ui-accent);
+  scrollbar-color: var(--ui-muted) var(--ui-surface);
+}
+.app[data-theme] :is(.sidebar, .topbar) {
+  background: var(--ui-sidebar);
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+}
+.app[data-theme]
+  :is(
+    .brand,
+    .m-wordmark,
+    .m-header-actions > button,
+    .m-hello-sun,
+    .greeting-sun,
+    .nav-item,
+    .workspace-switch,
+    .page-heading h1
+  ) {
+  color: var(--ui-text);
+}
+.app[data-theme] :is(.m-profile > span, .profile-avatar, .workspace-avatar) {
+  background: var(--ui-selected);
+  color: var(--ui-text);
+  border-color: var(--ui-surface);
+}
+.app[data-theme]
+  :is(
+    .nav-item.active,
+    .layout-toggle button.active,
+    .m-view-tabs button.active,
+    .m-week-days > button.selected,
+    .m-month-grid > button.selected
+  ) {
+  background: var(--ui-selected);
+  color: var(--ui-text);
+  border-color: var(--ui-accent);
+}
+.app[data-theme]
+  :is(
+    .sidebar-search,
+    .install-card,
+    .m-daily-progress,
+    .focus-card,
+    .habit-card,
+    .board-column,
+    .m-ritual-tile,
+    .focus-summary,
+    .filter-row,
+    .m-filter-inline
+  ) {
+  background: var(--ui-raised);
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+}
+.app[data-theme] :is(.day-hero, .m-hero) {
+  background: var(--ui-hero);
+  color: var(--ui-heroInk);
+}
+.app[data-theme] :is(.hero-copy h2, .m-hero h2) {
+  color: var(--ui-heroInk);
+}
+.app[data-theme]
+  :is(
+    .hero-copy > p,
+    .hero-copy > .eyebrow,
+    .hero-scribble,
+    .m-hero-copy > span,
+    .m-hero-copy > p
+  ) {
+  color: var(--ui-heroMuted);
+}
+.app[data-theme] .m-hero-copy > button {
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.app[data-theme] .hero-link {
+  color: var(--ui-heroInk);
+}
+.app[data-theme] :is(.m-hero-sticker, .hero-lavender) {
+  background: var(--ui-selected);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.app[data-theme]
+  :is(
+    .m-task-row,
+    .project-card,
+    .board-task,
+    .calendar-card,
+    .calendar-cell,
+    .habit-tracker,
+    .m-month-card,
+    .m-habit-item,
+    .m-you-links > button,
+    .m-project-strip > button,
+    .m-project-wide,
+    .m-weekly-wins,
+    .mood-trends,
+    .mood-calendar,
+    .m-round,
+    .modal
+  ) {
+  background: var(--ui-surface);
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+}
+.app[data-theme] .m-task-card {
+  background: var(--ui-cardA);
+  color: var(--ui-text);
+}
+.app[data-theme] .m-task-card:nth-child(even) {
+  background: var(--ui-cardB);
+}
+.app[data-theme] .m-task-card .m-task-open strong,
+.app[data-theme] .m-task-row .m-task-open strong {
+  color: var(--ui-text);
+}
+.app[data-theme] :is(.m-task-card, .m-task-row) .m-task-open :is(span, small),
+.app[data-theme] .m-card-footer > span {
+  color: var(--ui-text);
+}
+.app[data-theme] :is(.m-task-check, .task-check) {
+  border-color: var(--ui-muted);
+  color: var(--ui-strong);
+}
+.app[data-theme] .m-task-card > .m-task-check {
+  background: transparent;
+  border-color: var(--ui-muted);
+}
+.app[data-theme] .m-task-card .m-priority {
+  background: var(--ui-surface);
+  color: var(--ui-text);
+}
+.app[data-theme] .m-card-footer > button {
+  background: var(--ui-surface);
+  color: var(--ui-text);
+}
+.app[data-theme] :is(.m-task-card, .m-task-row).is-done .m-task-check,
+.app[data-theme] .task-row.completed .task-check {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--ui-accentInk);
+}
+.app[data-theme]
+  :is(
+    .task-row,
+    .task-toolbar,
+    .section-heading,
+    .day-stats,
+    .main-footer,
+    .sidebar-foot,
+    .habit-mini,
+    .habit-table,
+    .habit-row,
+    .habit-table-head,
+    .calendar-weekdays,
+    .calendar-cell,
+    .agenda-task,
+    .m-habit-days,
+    .m-wins-footer,
+    .m-browse-settings,
+    .modal-actions,
+    .comfort-settings,
+    .settings-data,
+    .subtasks > .field-label,
+    .search-input,
+    .search-results > button,
+    .shortcut-row,
+    .mood-point-detail,
+    .mood-context-summary
+  ) {
+  border-color: var(--ui-line);
+}
+.app[data-theme]
+  :is(
+    .task-row:hover,
+    .task-row:focus-within,
+    .search-results > button:hover,
+    .nav-item:hover,
+    .icon-btn:hover
+  ) {
+  background: var(--ui-soft);
+}
+.app[data-theme] :is(.nav-item.active:hover, .m-view-tabs button.active:hover) {
+  background: var(--ui-selected);
+}
+.app[data-theme]
+  :is(
+    .btn.dark,
+    .install-card > button,
+    .focus-controls > .btn,
+    .m-empty > button,
+    .m-add-row:hover
+  ) {
+  background: var(--ui-button);
+  color: var(--ui-buttonInk);
+  border-color: transparent;
+}
+.app[data-theme] .btn.dark kbd {
+  color: inherit;
+  border-color: currentColor;
+  opacity: 0.8;
+}
+.app[data-theme]
+  :is(
+    .btn.secondary,
+    .round-button,
+    .layout-toggle,
+    .filter-btn,
+    .m-view-tabs,
+    .m-count,
+    .m-round,
+    .icon-picker > button,
+    .subtask-add > button,
+    .restore-confirm,
+    .help-note,
+    .m-live-focus,
+    .m-browse-grid > button,
+    .mood-period,
+    .mood-no-data
+  ) {
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+}
+.app[data-theme]
+  :is(
+    .layout-toggle button.active,
+    .icon-picker > button.selected,
+    .mood-period > button[aria-pressed="true"]
+  ) {
+  background: var(--ui-button);
+  color: var(--ui-buttonInk);
+  border-color: var(--ui-accent);
+}
+.app[data-theme]
+  :is(
+    .calendar-cell.outside,
+    .m-month-grid > button.outside:not(.selected),
+    .calendar-weekdays,
+    .habit-table-head,
+    .m-habit-days button,
+    .ritual-check,
+    .mood-calendar-grid > button:not([style])
+  ) {
+  background: var(--ui-soft);
+  color: var(--ui-muted);
+  border-color: var(--ui-line);
+}
+.app[data-theme]
+  :is(
+    .calendar-cell.selected,
+    .m-habit-days button.checked,
+    .ritual-check.checked
+  ) {
+  background: var(--ui-selected);
+  color: var(--ui-text);
+  border-color: var(--ui-accent);
+  box-shadow: none;
+}
+.app[data-theme] .calendar-cell.today .calendar-cell-head > button:first-child {
+  background: var(--ui-accent);
+  color: var(--ui-accentInk);
+}
+.app[data-theme] .calendar-event {
+  color: #2f342a;
+}
+.app[data-theme] .m-month-grid > button.today {
+  border-color: var(--ui-accent);
+}
+.app[data-theme]
+  :is(
+    .m-week-days > button.selected > span,
+    .m-week-days > button.selected > b,
+    .m-month-grid > button.selected > b
+  ) {
+  color: var(--ui-text);
+}
+.app[data-theme] .m-week-days > button.selected > i {
+  background: var(--ui-strong);
+}
+.app[data-theme] :is(.ring-track, .m-progress-ring .ring-track) {
+  stroke: var(--ui-line);
+}
+.app[data-theme] :is(.ring-fill, .m-progress-ring .ring-fill) {
+  stroke: var(--ui-strong);
+}
+.app[data-theme]
+  :is(
+    .mini-progress,
+    .project-progress,
+    .m-project-progress,
+    .m-bars > div > div
+  ) {
+  background: var(--ui-soft);
+}
+.app[data-theme] .mini-progress > i {
+  background: var(--ui-strong);
+}
+.app[data-theme] .m-daily-progress > .m-progress-ring > span {
+  color: var(--ui-text);
+}
+.app[data-theme] .m-task-options {
+  color: var(--ui-muted);
+}
+/* Secondary text is explicit: photos and mood surfaces keep their own contrasts. */
+.app[data-theme]
+  :is(
+    .muted,
+    .page-eyebrow,
+    .workspace-switch small,
+    .nav-label,
+    .nav-item > small,
+    .sidebar-foot > span,
+    .breadcrumb,
+    .topbar-right > span,
+    .install-card p,
+    .install-card-top > span,
+    .day-stats p,
+    .day-stats b small,
+    .project-progress-label,
+    .focus-card > p,
+    .habit-card > p,
+    .daily-spark small,
+    .main-footer,
+    .task-meta,
+    .task-date,
+    .task-more,
+    .inline-add,
+    .task-toolbar > .text-btn,
+    .task-toolbar > .text-btn > span,
+    .project-section-heading > .text-btn,
+    .projects-intro > p,
+    .board-task-meta > small,
+    .board-column > h3 > span,
+    .board-empty,
+    .calendar-weekdays > span,
+    .calendar-agenda > .eyebrow,
+    .calendar-agenda > p,
+    .agenda-task small,
+    .view-intro,
+    .focus-summary > div > span,
+    .focus-summary small,
+    .habit-name small,
+    .habit-table-head,
+    .habit-bottom > span,
+    .habit-bottom > p,
+    .streak,
+    .empty-state,
+    .empty-state > p,
+    .empty-state h3
+  ) {
+  color: var(--ui-muted);
+}
+.app[data-theme]
+  :is(
+    .m-kicker,
+    .m-back-today,
+    .m-week-caption,
+    .m-week-days > button > span,
+    .m-section-title > button,
+    .m-plan-summary,
+    .m-count,
+    .m-daily-progress > div > span,
+    .m-ritual-tile > p,
+    .m-ritual-tile > span,
+    .m-project-strip small,
+    .m-signoff,
+    .m-page-note,
+    .m-planner-toolbar > span,
+    .m-view-tabs > button,
+    .m-add-row,
+    .m-project-wide .m-kicker,
+    .m-project-wide p,
+    .m-you-links small,
+    .m-you-links > button > svg,
+    .m-wins-top small,
+    .m-wins-top > span,
+    .m-wins-footer > span,
+    .m-bars > div > b,
+    .m-bars > div > span,
+    .m-agenda-subtitle,
+    .m-month-weekdays > span,
+    .m-habit-week-nav,
+    .m-habit-week-nav > span,
+    .m-habit-name small,
+    .m-habit-days > div > span,
+    .m-browse > p,
+    .m-empty > p,
+    .m-empty h3,
+    .m-filter-inline
+  ) {
+  color: var(--ui-muted);
+}
+.app[data-theme]
+  :is(
+    .mood-overline,
+    .mood-period > button,
+    .mood-trends > p,
+    .mood-stats > div > span,
+    .mood-stats b > small,
+    .mood-axis,
+    .mood-chart-dates,
+    .mood-chart-note,
+    .mood-no-data p,
+    .mood-context-summary small,
+    .mood-calendar-grid > span,
+    .mood-legend > span,
+    .mood-calendar > p
+  ) {
+  color: var(--ui-muted);
+}
+.app[data-theme] .mood-period > button[aria-pressed="true"] {
+  color: var(--ui-buttonInk);
+}
+.app[data-theme] .mood-stats > div + div {
+  border-color: var(--ui-line);
+}
+.app[data-theme] .mood-grid line {
+  stroke: var(--ui-line);
+}
+.app[data-theme] .mood-trend-line {
+  stroke: var(--ui-strong);
+}
+.app[data-theme] .mood-calendar-nav button:hover {
+  background: var(--ui-soft);
+}
+.app[data-theme] .mood-context-summary > div > span {
+  background: var(--ui-raised);
+  color: var(--ui-text);
+}
+.app[data-theme] :is(.task-date.overdue, .error-text, .danger-btn) {
+  color: var(--ui-danger);
+}
+.app[data-theme] .priority-badge.high {
+  background: #f8e2dc;
+  color: #873e32;
+}
+.app[data-theme] .priority-badge.medium {
+  background: #f7edc5;
+  color: #6c5614;
+}
+.app[data-theme] .priority-badge.low {
+  background: #e4eedc;
+  color: #426039;
+}
+/* Shared editors and form states. */
+.app[data-theme] .modal-backdrop {
+  background: #11131b85;
+}
+.app[data-theme]
+  :is(
+    .modal input:not([type="checkbox"]),
+    .modal select,
+    .modal textarea,
+    .filter-row select,
+    .board-task > select,
+    .m-filter-inline select
+  ) {
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+}
+.app[data-theme] .modal .task-title-input {
+  background: transparent;
+  border-color: var(--ui-line);
+}
+.app[data-theme]
+  .modal
+  :is(
+    .modal-top > .eyebrow,
+    .modal-top > .icon-btn,
+    .quick-hint,
+    .form-grid label > span,
+    .field-label,
+    .field-label > span,
+    .modal-actions > .small,
+    .settings-data p,
+    .comfort-settings small,
+    .search-results > .eyebrow,
+    .search-results small,
+    .search-results > button > svg,
+    .restore-confirm p,
+    .help-note,
+    .help-note h3,
+    .install-steps,
+    .reflection-image + .eyebrow
+  ) {
+  color: var(--ui-muted);
+}
+.app[data-theme] .modal .modal-top > .icon-btn {
+  background: var(--ui-soft);
+}
+.app[data-theme] .modal :is(input, textarea)::placeholder {
+  color: var(--ui-muted);
+  opacity: 0.9;
+}
+.app[data-theme] :is(input[type="checkbox"], .modal input[type="checkbox"]) {
+  accent-color: var(--ui-strong);
+}
+.app[data-theme] :is(button, a, input, textarea, select):focus-visible {
+  outline-color: var(--ui-strong);
+}
+.app[data-theme] :is(input, textarea, select):focus {
+  outline-color: var(--ui-strong);
+}
+.app[data-theme] kbd {
+  color: var(--ui-muted);
+  border-color: var(--ui-line);
+}
+.app[data-theme] .toast {
+  background: var(--ui-button);
+  color: var(--ui-buttonInk);
+}
+.app[data-theme] .toast :is(button, .toast-check) {
+  color: inherit;
+}
+/* The supplied glass material is unchanged; icon ink adapts to its surroundings. */
+.app[data-theme] .glass-icons > .nav-btn {
+  color: var(--ui-text);
+}
+.app[data-theme] .nav-timer-dot {
+  background: var(--ui-strong);
+}
+.app[data-theme] .solid-glass .glass-specular {
+  background: var(--ui-surface);
+}
+@supports not (
+  (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))
+) {
+  .app[data-theme] .glass-specular {
+    background: var(--ui-surface);
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .app[data-theme] .glass-specular {
+    background: var(--ui-surface);
+  }
+}
+/* Theme picker and an honest live miniature of the actual semantic palette. */
+.theme-preview-wrap {
+  margin: 19px 0 0;
+}
+.palette-live-preview {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-line);
+  border-radius: 19px;
+  padding: 15px 17px 11px;
+  overflow: hidden;
+  box-shadow: 0 5px 18px #00000007;
+}
+.palette-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.palette-preview-header > b {
+  font-family: Manrope;
+  letter-spacing: -0.6px;
+}
+.palette-preview-header > small {
+  margin-left: auto;
+  font-size: 7px;
+  letter-spacing: 1.5px;
+  color: var(--ui-muted);
+}
+.palette-preview-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--ui-hero);
+  color: var(--ui-heroInk);
+  padding: 14px 16px;
+  border-radius: 13px;
+  margin: 12px 0 9px;
+}
+.palette-preview-hero span {
+  font-size: 7px;
+  letter-spacing: 0.6px;
+  color: var(--ui-heroMuted);
+}
+.palette-preview-hero strong {
+  display: block;
+  font-family: Manrope;
+  font-size: 20px;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  margin-top: 5px;
+}
+.palette-preview-hero > svg {
+  color: var(--ui-heroMuted);
+  stroke-width: 1;
+}
+.palette-preview-tasks {
+  display: flex;
+  gap: 7px;
+}
+.palette-preview-tasks > div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--ui-cardA);
+  border-radius: 9px;
+  padding: 11px 9px;
+  flex: 1;
+  font-size: 9px;
+}
+.palette-preview-tasks > div + div {
+  background: var(--ui-cardB);
+}
+.palette-preview-tasks > div > span {
+  height: 13px;
+  width: 13px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ui-muted);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.palette-preview-tasks i {
+  font-style: normal;
+}
+.palette-preview-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin: 12px auto 0;
+  padding: 7px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+  border-radius: 25px;
+  width: 180px;
+}
+.palette-preview-nav > span {
+  width: 8px;
+  height: 8px;
+  background: var(--ui-muted);
+  border-radius: 3px;
+}
+.palette-preview-nav > b {
+  border-radius: 50%;
+  background: var(--ui-accent);
+  color: var(--ui-accentInk);
+  padding: 3px;
+  display: flex;
+}
+.palette-preview-caption {
+  font-size: 10px;
+  line-height: 1.7;
+  margin: 10px 0 0;
+  color: var(--ui-muted);
+}
+.journey-palettes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.journey-palettes > button {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+}
+.journey-palettes > button > i {
+  height: 35px;
+  width: 35px;
+  margin: 0;
+  flex-shrink: 0;
+  color: #352d33;
+}
+.journey-palettes > button[data-theme-option="midnight"] > i {
+  color: #e6d9ff;
+}
+.journey-palettes > button > span {
+  font-size: 12px;
+}
+.journey-palettes small {
+  color: var(--ui-muted);
+  font-size: 9px;
+  margin: 3px 0 0;
+}
+.journey-palettes > button.selected {
+  background: var(--ui-raised);
+  border-color: var(--ui-strong);
+  box-shadow: 0 0 0 1px var(--ui-strong);
+}
+.app[data-theme] .settings-themes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+.app[data-theme] .settings-themes > button {
+  min-height: 49px;
+  font-size: 12px;
+}
+.app[data-theme] .settings-themes > button.selected {
+  border-color: var(--ui-strong);
+  box-shadow: 0 0 0 2px var(--ui-surface) inset;
+}
+.setup-journey.is-palette-step
+  :is(
+    .journey-brand,
+    .journey-skip,
+    .journey-question-heading h1,
+    .journey-questions legend,
+    .journey-examples,
+    .journey-story h2,
+    .poster-index
+  ) {
+  color: var(--ui-text);
+}
+.setup-journey.is-palette-step
+  :is(
+    .journey-question-heading > p,
+    .journey-eyebrow,
+    .journey-helper,
+    .journey-examples small,
+    .journey-story > span,
+    .journey-story > p
+  ) {
+  color: var(--ui-muted);
+}
+.setup-journey.is-palette-step .journey-poster {
+  background: var(--ui-raised);
+}
+.setup-journey.is-palette-step .journey-recap {
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+}
+.setup-journey.is-palette-step .journey-recap > span {
+  color: var(--ui-text);
+}
+.setup-journey.is-palette-step .journey-footer {
+  background: var(--ui-bg);
+  border-color: var(--ui-line);
+}
+.setup-journey.is-palette-step .journey-next {
+  background: var(--ui-button);
+  color: var(--ui-buttonInk);
+}
+.setup-journey.is-palette-step .journey-back {
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+}
+.setup-journey.is-palette-step .journey-dots button > i {
+  background: var(--ui-strong);
+}
+.setup-journey.is-palette-step .journey-examples input {
+  accent-color: var(--ui-strong);
+}
+.setup-journey.is-palette-step :is(input, button):focus-visible {
+  outline-color: var(--ui-strong);
+}
+.night-illustration {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  color: #c5b7ea;
+  animation: art-arrives 0.8s ease both;
+}
+.night-illustration > svg {
+  fill: #c5b7ea18;
+  filter: drop-shadow(0 0 28px #b8a3e53b);
+  transform: rotate(-12deg);
+}
+.night-illustration > i {
+  height: 4px;
+  width: 4px;
+  border-radius: 50%;
+  background: #ded5f4;
+  position: absolute;
+  box-shadow: 0 0 12px #e7dcff77;
+}
+.night-illustration > i:nth-child(2) {
+  top: 14%;
+  left: 28%;
+}
+.night-illustration > i:nth-child(3) {
+  top: 38%;
+  right: 15%;
+}
+.night-illustration > i:nth-child(4) {
+  bottom: 32%;
+  left: 12%;
+}
+.night-illustration > i:nth-child(5) {
+  top: 8%;
+  right: 27%;
+  width: 2px;
+  height: 2px;
+}
+.night-illustration > span {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #c7c0d9;
+}
+/* Midnight is a designed dark palette, not an image inversion filter. */
+.app.theme-midnight {
+  color-scheme: dark;
+}
+.app.theme-midnight .m-hero > img {
+  mix-blend-mode: normal;
+  opacity: 0.75;
+  mask-image: linear-gradient(90deg, transparent, #000 55%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 55%);
+}
+.app.theme-midnight :is(.m-task-card > .tiny-art, .hero-art > img) {
+  opacity: 0.88;
+}
+.app.theme-midnight .hero-lavender {
+  background: #4b405b;
+}
+.app.theme-midnight .hero-note {
+  background: #ece7da;
+  color: #424337;
+}
+.app.theme-midnight
+  :is(
+    .m-ritual-tile h3,
+    .m-ritual-tile > svg,
+    .m-daily-progress b,
+    .m-wins-top strong,
+    .focus-clock,
+    .focus-card .section-heading > span,
+    .habit-card h2,
+    .m-project-strip b,
+    .project-card h3
+  ) {
+  color: var(--ui-text);
+}
+.app.theme-midnight .m-ritual-tile > span {
+  border-color: var(--ui-line);
+}
+.app.theme-midnight
+  :is(
+    .m-habit-name > span:first-child,
+    .habit-icon,
+    .stat-icon,
+    .modal-feature-icon
+  ) {
+  background: var(--ui-raised) !important;
+  color: var(--ui-accent);
+}
+.app.theme-midnight .m-habit-name > svg {
+  color: var(--ui-muted);
+}
+.app.theme-midnight .priority-badge.high {
+  background: #4a303b;
+  color: #ffc6c1;
+}
+.app.theme-midnight .priority-badge.medium {
+  background: #40392a;
+  color: #f8dd97;
+}
+.app.theme-midnight .priority-badge.low {
+  background: #293e37;
+  color: #bbe2b4;
+}
+.app.theme-midnight
+  :is(
+    .m-browse-grid > button,
+    .m-browse-grid > button:nth-child(3n),
+    .m-browse-grid > button:nth-child(3n + 1)
+  ) {
+  background: var(--ui-raised);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.app.theme-midnight
+  :is(
+    .m-browse-settings,
+    .m-browse-settings > svg,
+    .m-you-links > button > svg,
+    .m-you-links > button > span
+  ) {
+  color: var(--ui-text);
+}
+.app.theme-midnight .m-reflect-feature {
+  background: var(--ui-raised);
+}
+.app.theme-midnight .m-reflect-feature > div {
+  background: linear-gradient(90deg, #292f3e 47%, #292f3edb 66%, transparent);
+}
+.app.theme-midnight .m-reflect-feature > img {
+  mix-blend-mode: normal;
+  opacity: 0.75;
+}
+.app.theme-midnight .m-reflect-feature :is(h3, small, div > span) {
+  color: var(--ui-text);
+}
+.app.theme-midnight .m-journal-tile {
+  background: #3d4130;
+}
+.app.theme-midnight .m-journal-tile > img {
+  opacity: 0.45;
+}
+.app.theme-midnight .m-journal-tile :is(h3, span, p) {
+  color: #f8f4df;
+}
+.app.theme-midnight .m-journal-tile > div {
+  background: linear-gradient(180deg, #252c2680, transparent);
+}
+.app.theme-midnight .m-journal-tile .m-tile-link {
+  background: #252c26;
+  color: #f8f4df;
+}
+.app.theme-midnight .m-habits-hero > div {
+  background: linear-gradient(90deg, #202b29f2, #202b2980);
+}
+.app.theme-midnight .m-habits-hero :is(h2, div > span) {
+  color: #eef5e8;
+}
+.app.theme-midnight :is(.habits-hero, .project-banner, .m-project-hero) {
+  background: var(--ui-raised) !important;
+  color: var(--ui-text);
+}
+.app.theme-midnight
+  :is(
+    .habits-hero h2,
+    .habits-hero p,
+    .habits-hero .eyebrow,
+    .project-banner p,
+    .m-project-hero > span
+  ) {
+  color: var(--ui-text);
+}
+.app.theme-midnight .m-project-hero > span {
+  background: linear-gradient(90deg, #292f3ef2, #292f3e22);
+}
+.app.theme-midnight .m-project-hero > button {
+  background: var(--ui-surface);
+  color: var(--ui-text);
+}
+.app.theme-midnight .daily-spark {
+  background: var(--ui-raised);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.app.theme-midnight .daily-spark .eyebrow {
+  color: var(--ui-muted);
+}
+.app.theme-midnight .project-new {
+  background: var(--ui-soft);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.app.theme-midnight .project-new > span {
+  color: var(--ui-muted);
+}
+.app.theme-midnight .habit-row .habit-name > span {
+  color: var(--ui-text);
+}
+.app.theme-midnight .habit-tick {
+  border-color: var(--ui-muted);
+}
+.app.theme-midnight .habit-tick:checked,
+.app.theme-midnight .habit-mini.done .habit-tick {
+  background: var(--ui-accent);
+  color: var(--ui-accentInk);
+  border-color: var(--ui-accent);
+}
+.app.theme-midnight .task-row.completed .task-title {
+  color: var(--ui-muted);
+}
+/* Emotional colors remain distinct, but at a comfortable dark luminance. */
+.app.theme-midnight .mood-checkin {
+  --mood-ink: var(--mood-color) !important;
+  background: color-mix(in srgb, var(--mood-color) 17%, var(--ui-bg));
+  color: var(--mood-color);
+  border: 1px solid color-mix(in srgb, var(--mood-color) 25%, transparent);
+}
+.app.theme-midnight .mood-checkin:before {
+  border-color: #ffffff07;
+}
+.app.theme-midnight
+  .mood-checkin
+  :is(.mood-primary, .mood-tags > button[aria-pressed="true"]) {
+  background: var(--mood-color);
+  color: #19222d;
+}
+.app.theme-midnight
+  .mood-checkin
+  :is(.mood-date-display, .mood-saved-tick, .saved-mood-tags > span) {
+  background: #ffffff0c;
+}
+.app.theme-midnight .mood-slide textarea {
+  background: #14182055;
+  border-color: #ffffff26;
+  color: var(--mood-color);
+}
+.app.theme-midnight .feeling-slider::-webkit-slider-thumb {
+  border-color: var(--ui-bg);
+}
+.app.theme-midnight .feeling-slider::-moz-range-thumb {
+  border-color: var(--ui-bg);
+}
+.app.theme-midnight .mood-chart-point > circle:nth-child(2) {
+  fill: var(--mood-point);
+  stroke: var(--ui-surface);
+}
+.app.theme-midnight .mood-calendar-grid > button[style] {
+  background: color-mix(
+    in srgb,
+    var(--day-mood) 20%,
+    var(--ui-surface)
+  ) !important;
+  color: var(--day-mood) !important;
+}
+.app.theme-midnight .mood-calendar-grid > button.today {
+  outline-color: var(--ui-accent);
+}
+.app.theme-midnight .mood-calendar-grid > button:disabled {
+  opacity: 0.45;
+}
+.app.theme-midnight .mood-remove {
+  border-color: #ffffff18;
+}
+@keyframes midnight-win {
+  0% {
+    box-shadow: 0 0 0 0 #c4b5ed00;
+  }
+  35% {
+    box-shadow: 0 0 0 5px #c4b5ed35;
+    background-color: #393a50;
+  }
+  100% {
+    box-shadow: 0 0 0 0 #c4b5ed00;
+  }
+}
+.app.theme-midnight .just-completed {
+  animation: midnight-win 0.7s ease both !important;
+}
+@media (max-width: 767px) {
+  .setup-journey.is-palette-step .journey-poster {
+    background: transparent;
+  }
+  .setup-journey.is-palette-step .journey-questions {
+    padding-top: 20px;
+  }
+  .journey-palettes > button {
+    padding: 10px;
+    gap: 8px;
+  }
+  .journey-palettes > button > span {
+    font-size: 11px;
+  }
+  .journey-palettes small {
+    font-size: 9px;
+  }
+  .journey-palettes > button > i {
+    height: 31px;
+    width: 31px;
+  }
+  .palette-live-preview {
+    padding: 13px 14px 10px;
+  }
+  .palette-preview-caption {
+    font-size: 10px;
+  }
+  .night-illustration {
+    gap: 12px;
+  }
+  .night-illustration > svg {
+    width: 100px;
+    height: 100px;
+  }
+  .night-illustration > span {
+    font-size: 9px;
+  }
+  .app[data-theme] .m-focus-page .focus-summary :is(span, small) {
+    color: var(--ui-muted);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.theme-midnight .just-completed,
+  .night-illustration {
+    animation: none !important;
+  }
+}
+.app.less-motion.theme-midnight .just-completed {
+  animation: none !important;
+}
+.app[data-theme]
+  :is(
+    .day-stats > div > div > span,
+    .section-heading > div > p,
+    .m-week-caption > span
+  ) {
+  color: var(--ui-muted);
+}
+.app[data-theme] :is(.breadcrumb > b, .brand > svg) {
+  color: var(--ui-text);
+}
+.app[data-theme] :is(.task-toolbar > select, .view-switch, .count-chip) {
+  background: var(--ui-soft);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.app[data-theme] .view-switch button {
+  color: var(--ui-muted);
+}
+.app[data-theme] .view-switch button.active {
+  background: var(--ui-selected);
+  color: var(--ui-text);
+}
+.app[data-theme] .daily-spark > span > .eyebrow {
+  color: #725867;
+}
+.app.theme-midnight .daily-spark > span > .eyebrow {
+  color: var(--ui-muted);
+}
+.app[data-theme] .m-add-row {
+  background: var(--ui-soft);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.app[data-theme] .m-add-row:hover {
+  background: var(--ui-selected);
+}
+.app.theme-midnight .m-journal-tile small {
+  background: #252c26;
+  color: #f8f4df;
+}
+.app[data-theme] .m-month-grid > button > b {
+  color: var(--ui-text);
+}
+.app[data-theme] .m-month-grid > button.outside > b {
+  color: var(--ui-muted);
+}
+.app[data-theme] :is(.m-page-heading > p, .m-page-heading > div > p) {
+  color: var(--ui-muted);
+}
+.app[data-theme] .calendar-more {
+  color: var(--ui-text);
+}
+.app[data-theme]
+  :is(
+    .m-soft-note,
+    .habit-table-heading,
+    .habit-table-heading > span,
+    .habit-table-heading > span > b
+  ) {
+  color: var(--ui-muted);
+}
+.app[data-theme] .habit-table-heading > .today {
+  color: var(--ui-text);
+}
+.app[data-theme] .habit-table-heading > .today > b {
+  color: var(--ui-accentInk);
+  background: var(--ui-accent);
+}
+.app[data-theme]
+  :is(.habit-table-heading, .habit-table-row, .day-stats > div + div) {
+  border-color: var(--ui-line);
+}
+.app[data-theme]
+  :is(.board-task-title, .board-column > h3, .search-results > button) {
+  color: var(--ui-text);
+}

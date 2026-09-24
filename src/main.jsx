@@ -59,6 +59,11 @@ import SetupJourney from "./Journey.jsx";
 import MoodSpace from "./MoodSpace.jsx";
 import MobileExperience, { MobileBrowse } from "./Mobile.jsx";
 import { useMedia, useTaskCelebration, CompletionEffects } from "./motion.jsx";
+import { THEMES as themes, themeVars, useThemeChrome } from "./themes.js";
+import ThemePreview from "./ThemePreview.jsx";
+import ProjectArtwork from "./ProjectArtwork.jsx";
+import { playChime, startAmbientSound, stopAmbientSound } from "./audio.js";
+import "./themes.css";
 
 const KEY = "daylight.workspace.v1";
 const uid = () => crypto.randomUUID();
@@ -158,11 +163,7 @@ const AREAS = [
     color: COLORS[5],
   },
 ];
-const themes = {
-  sunshine: { name: "Sunshine", color: "#f7df83", desc: "A little brighter" },
-  blossom: { name: "Blossom", color: "#efc7de", desc: "Soft & expressive" },
-  sage: { name: "Sage", color: "#d7dfbb", desc: "Room to breathe" },
-};
+
 function makeWorkspace(p) {
   const projects = p.areas.map((name) => ({
     ...AREAS.find((x) => x.name === name),
@@ -409,6 +410,9 @@ function App() {
       return { remaining: 1500, running: false, mode: "focus", taskId: "" };
     }
   });
+  const [previewTheme, setPreviewTheme] = useState(null);
+  const activeTheme = previewTheme || data?.profile?.theme;
+  useThemeChrome(activeTheme);
   const celebration = useTaskCelebration(data?.profile?.celebrations !== false);
 
   const toastTimer = useRef();
@@ -449,6 +453,7 @@ function App() {
           ],
         }));
       setTimer((t) => ({ ...t, running: false, remaining: 0 }));
+      playChime("focus-complete");
       notify(
         timer.mode === "focus"
           ? "Focus session complete. Make a little room for a break."
@@ -557,6 +562,7 @@ function App() {
   const toggleTask = (t, element) => {
     const done = t.status !== "done";
     if (done && !celebration.celebrate(t, element)) return;
+    if (done) playChime("task-celebrate");
     if (!done) celebration.clear(t.id);
     let next = null;
     if (done && t.repeat !== "none") next = nextOccurrence(t);
@@ -904,9 +910,10 @@ function App() {
   );
   return (
     <div
-      className={`app theme-${profile.theme} ${profile.celebrations === false ? "less-motion" : ""} ${isMobile ? "mobile-app" : "desktop-app"} ${view === "My day" ? "home-enter" : ""}`}
+      data-theme={activeTheme}
+      className={`app theme-${activeTheme} ${profile.celebrations === false ? "less-motion" : ""} ${isMobile ? "mobile-app" : "desktop-app"} ${view === "My day" ? "home-enter" : ""}`}
       style={{
-        "--accent": themes[profile.theme]?.color || themes.sunshine.color,
+        ...themeVars(activeTheme),
       }}
     >
       {mobileNav && (
@@ -1584,6 +1591,7 @@ function App() {
       {modal?.type === "settings" && (
         <SettingsModal
           data={data}
+          onThemePreview={setPreviewTheme}
           onClose={() => setModal(null)}
           onSave={(p) => {
             update((d) => ({ ...d, profile: p }));
@@ -1891,6 +1899,7 @@ function ProjectCard({ project: p, tasks, onClick }) {
   return (
     <button className="project-card" onClick={onClick}>
       <div className="project-photo">
+        <ProjectArtwork name={p.name} color={p.color} />
         <img src={photo(p.image)} alt={`${p.name} inspiration`} />
         <span style={{ background: p.color }}>
           <ArrowUpRight size={16} />
@@ -2575,43 +2584,38 @@ function FocusView({
   sessions,
 }) {
   const [scene, setScene] = useState("forest"),
-    [sound, setSound] = useState(false);
-  const audioRef = useRef(null);
-  useEffect(
-    () => () => {
-      audioRef.current?.close();
-    },
-    [],
-  );
+    [sound, setSound] = useState(false),
+    [soundType, setSoundType] = useState("brown");
+  const ambientInstance = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      stopAmbientSound();
+      ambientInstance.current = null;
+    };
+  }, []);
+
   function toggleSound() {
     if (sound) {
-      audioRef.current?.close();
-      audioRef.current = null;
+      stopAmbientSound();
+      ambientInstance.current = null;
       setSound(false);
       return;
     }
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const buffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
-      const channel = buffer.getChannelData(0);
-      let last = 0;
-      for (let i = 0; i < channel.length; i++) {
-        last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
-        channel[i] = last * 4;
-      }
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.loop = true;
-      const gain = ctx.createGain();
-      gain.gain.value = 0.18;
-      source.connect(gain).connect(ctx.destination);
-      source.start();
-      audioRef.current = ctx;
-      setSound(true);
-    } catch {
-      setSound(false);
+    const inst = startAmbientSound(soundType, 0.45);
+    ambientInstance.current = inst;
+    setSound(!!inst);
+  }
+
+  function changeSoundType(type) {
+    setSoundType(type);
+    if (sound) {
+      const inst = startAmbientSound(type, 0.45);
+      ambientInstance.current = inst;
     }
   }
+
+  const soundLabel = soundType === "brown" ? "Brown noise" : soundType === "rain" ? "Gentle rain" : soundType === "forest" ? "Forest breeze" : "Alpha waves";
   return (
     <>
       <p className="view-intro">Quiet the noise. Make room for one thing.</p>
@@ -2626,10 +2630,30 @@ function FocusView({
             <span className={`live-dot ${timer.running ? "" : "idle"}`} />
             {timer.running ? "IN YOUR FOCUS ERA" : "YOUR MOMENT OF CLARITY"}
           </span>
-          <button onClick={toggleSound} className="sound-btn">
-            {sound ? <Volume2 size={17} /> : <VolumeX size={17} />}Brown noise{" "}
-            {sound ? "on" : "off"}
-          </button>
+          <div className="focus-audio-controls">
+            <button onClick={toggleSound} className="sound-btn">
+              {sound ? <Volume2 size={17} /> : <VolumeX size={17} />}Brown noise{" "}
+              {sound ? "on" : "off"}
+            </button>
+          </div>
+        </div>
+        <div className="ambient-sound-selector" aria-label="Ambient soundscapes">
+          {[
+            ["brown", "Brown noise"],
+            ["rain", "Gentle rain"],
+            ["forest", "Forest breeze"],
+            ["binaural", "Alpha wave 432Hz"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={`ambient-sound-tag ${soundType === id ? "active" : ""}`}
+              onClick={() => changeSoundType(id)}
+            >
+              {soundType === id && sound && <Volume2 size={12} />}
+              {label}
+            </button>
+          ))}
         </div>
         <div className="focus-room-content">
           <div className="focus-mode">
@@ -3044,7 +3068,15 @@ function validWorkspace(d) {
     )
   );
 }
-function SettingsModal({ data, onClose, onSave, onImport, notify }) {
+function SettingsModal({
+  data,
+  onClose,
+  onSave,
+  onImport,
+  notify,
+  onThemePreview,
+}) {
+  useEffect(() => () => onThemePreview(null), [onThemePreview]);
   const [p, setP] = useState(data.profile),
     [incoming, setIncoming] = useState(null),
     [error, setError] = useState("");
@@ -3152,15 +3184,25 @@ function SettingsModal({ data, onClose, onSave, onImport, notify }) {
             <button
               type="button"
               className={p.theme === id ? "selected" : ""}
-              style={{ background: t.color }}
+              style={{
+                background: t.mode === "dark" ? "#242938" : t.color,
+                color: t.mode === "dark" ? "#f0edf5" : "#352d33",
+              }}
+              data-theme-option={id}
+              aria-label={t.name}
+              aria-pressed={p.theme === id}
               key={id}
-              onClick={() => setP({ ...p, theme: id })}
+              onClick={() => {
+                setP({ ...p, theme: id });
+                onThemePreview(id);
+              }}
             >
               {t.name}
               {p.theme === id && <Check size={16} />}
             </button>
           ))}
         </div>
+        <ThemePreview value={p.theme} />
         <div className="comfort-settings">
           <label>
             <span>

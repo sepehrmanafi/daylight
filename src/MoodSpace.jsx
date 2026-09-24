@@ -260,6 +260,7 @@ function MoodTrends({ data, onEdit }) {
                       cy={y(v)}
                       r={chosen === days[i] ? 6 : 4.5}
                       fill={FEELINGS[v].ink}
+                      style={{ "--mood-point": FEELINGS[v].color }}
                       stroke="#fffdf8"
                       strokeWidth="2"
                     />
@@ -363,7 +364,15 @@ function MoodTrends({ data, onEdit }) {
                 onClick={() => onEdit(date)}
                 aria-label={`${date}, ${v ? v.label : "no check-in"}`}
                 className={date === today() ? "today" : ""}
-                style={v ? { background: v.color, color: v.ink } : undefined}
+                style={
+                  v
+                    ? {
+                        background: v.color,
+                        color: v.ink,
+                        "--day-mood": v.color,
+                      }
+                    : undefined
+                }
               >
                 {i + 1}
                 {v && <i />}

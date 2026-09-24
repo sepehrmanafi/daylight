@@ -35,6 +35,7 @@ import {
 import "./mobile.css";
 import GlassNav from "./GlassNav.jsx";
 import MoodSpace from "./MoodSpace.jsx";
+import ProjectArtwork from "./ProjectArtwork.jsx";
 import "./experience.css";
 const photo = (n) => `${import.meta.env.BASE_URL}images/${n}.jpg`;
 const dayKey = (d = new Date()) =>
@@ -546,7 +547,10 @@ function MobileHome({
       <div className="m-project-strip">
         {data.projects.map((p) => (
           <button key={p.id} onClick={() => onGo(p.id)}>
-            <img src={photo(p.image)} alt={`${p.name} project cover`} />
+            <div className="project-photo-wrapper">
+              <ProjectArtwork name={p.name} color={p.color} />
+              <img src={photo(p.image)} alt={`${p.name} project cover`} />
+            </div>
             <span>
               <b>{p.name}</b>
               <small>
@@ -1097,7 +1101,10 @@ function MobileProjects({ data, onGo, onModal }) {
             className="m-project-wide"
             onClick={() => onGo(p.id)}
           >
-            <img src={photo(p.image)} alt={`${p.name} project cover`} />
+            <div className="project-photo-wrapper">
+              <ProjectArtwork name={p.name} color={p.color} />
+              <img src={photo(p.image)} alt={`${p.name} project cover`} />
+            </div>
             <div>
               <span className="m-kicker">YOUR LITTLE BIG PLAN</span>
               <h2>{p.name}</h2>
