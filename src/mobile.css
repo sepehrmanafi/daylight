@@ -3020,3 +3020,153 @@
   width: 100%;
   height: 100%;
 }
+
+/* Wide project card styling in Projects list */
+.m-project-wide .project-photo-wrapper {
+  position: relative;
+  width: 40%;
+  min-width: 120px;
+  overflow: hidden;
+  background: var(--ui-raised, #f0f2eb);
+  display: flex;
+}
+.m-project-wide .project-photo-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+  mix-blend-mode: multiply;
+  opacity: 0.88;
+}
+.app.theme-midnight .m-project-wide .project-photo-wrapper img {
+  mix-blend-mode: luminosity;
+  opacity: 0.65;
+}
+.m-project-wide .project-photo-wrapper .project-svg-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Refined project hero under Plan / Planner */
+.m-project-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  margin-bottom: 25px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 20px;
+  isolation: isolate;
+}
+.m-project-hero .project-svg-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -3;
+}
+.m-project-hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+.app.theme-midnight .m-project-hero > img {
+  mix-blend-mode: luminosity;
+  opacity: 0.45;
+}
+.m-project-hero:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(20, 24, 32, 0.75) 0%, rgba(20, 24, 32, 0.2) 60%, rgba(20, 24, 32, 0.4) 100%);
+  z-index: -1;
+}
+.m-project-hero-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 14px;
+}
+.m-project-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 20px;
+  padding: 5px 10px 5px 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.m-project-back-btn:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.4);
+}
+.m-project-counter-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  border-radius: 12px;
+  padding: 4px 10px;
+}
+.m-project-hero > span {
+  margin-top: auto;
+  font-family: Manrope, sans-serif;
+  font-size: 19px;
+  color: #fff;
+  max-width: 280px;
+  line-height: 1.35;
+  letter-spacing: -0.4px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.m-project-hero-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 14px;
+  gap: 12px;
+}
+.m-project-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.m-project-progress-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+  transition: width 0.4s ease;
+}
+.m-project-hero-footer button {
+  background: #fff;
+  color: #2b3027;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}

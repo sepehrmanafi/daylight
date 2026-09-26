@@ -15,6 +15,12 @@ import {
 import { themeVars, useThemeChrome } from "./themes.js";
 import ThemePreview from "./ThemePreview.jsx";
 import InteractiveSlider from "./InteractiveSlider.jsx";
+import {
+  IllustrationStep1,
+  IllustrationStep2,
+  IllustrationStep3,
+  IllustrationStep4,
+} from "./OnboardingIllustrations.jsx";
 const image = (n) => `${import.meta.env.BASE_URL}images/${n}.jpg`;
 export function useSwipe(onNext, onBack) {
   const start = useRef(null);
@@ -187,7 +193,13 @@ export default function SetupJourney({
         >
           <section className="journey-poster">
             <div className="journey-art">
-              {step === 3 && p.theme === "midnight" ? (
+              {step === 0 ? (
+                <IllustrationStep1 />
+              ) : step === 1 ? (
+                <IllustrationStep2 />
+              ) : step === 2 ? (
+                <IllustrationStep3 />
+              ) : step === 3 && p.theme === "midnight" ? (
                 <div
                   className="night-illustration"
                   aria-label="A quiet moonlit sky"
@@ -200,20 +212,7 @@ export default function SetupJourney({
                   <span>A little calm. A softer glow.</span>
                 </div>
               ) : (
-                <img
-                  src={image(story.art)}
-                  className={step < 2 ? "journey-cutout" : ""}
-                  draggable={false}
-                  alt={
-                    step === 0
-                      ? "An illustrated person making space for a new idea"
-                      : step === 1
-                        ? "An illustrated person reflecting in a colorful armchair"
-                        : step === 2
-                          ? "Playful balancing shapes"
-                          : "A sunlit path through gentle green hills"
-                  }
-                />
+                <IllustrationStep4 />
               )}
               <span className="journey-orbit">
                 <Sparkles size={23} />

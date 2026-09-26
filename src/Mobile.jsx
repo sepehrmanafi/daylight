@@ -612,18 +612,47 @@ function MobileTasks({
         { high: 0, medium: 1, low: 2 }[a.priority] -
           { high: 0, medium: 1, low: 2 }[b.priority],
     );
+  const allProjectTasks = project
+    ? data.tasks.filter((t) => t.projectId === project.id)
+    : [];
+  const doneProjectTasks = allProjectTasks.filter((t) => t.status === "done").length;
+
   return (
     <div className="m-planner">
       {project && (
         <div className="m-project-hero" style={{ background: project.color }}>
+          <ProjectArtwork name={project.name} color={project.color} />
           <img src={photo(project.image)} alt={`${project.name} inspiration`} />
+          <div className="m-project-hero-badge">
+            <button
+              type="button"
+              className="m-project-back-btn"
+              onClick={() => onGo("Projects")}
+              aria-label="Back to all projects"
+            >
+              <ChevronLeft size={16} /> All projects
+            </button>
+            <span className="m-project-counter-tag">
+              {allProjectTasks.length - doneProjectTasks} to go · {allProjectTasks.length ? Math.round((doneProjectTasks / allProjectTasks.length) * 100) : 0}% done
+            </span>
+          </div>
           <span>
             {project.desc || "A little space for your next big idea."}
           </span>
-          <button onClick={() => onModal({ type: "project", project })}>
-            Edit project
-            <ArrowUpRight size={15} />
-          </button>
+          <div className="m-project-hero-footer">
+            <div className="m-project-progress-bar">
+              <i
+                style={{
+                  width: `${allProjectTasks.length ? (doneProjectTasks / allProjectTasks.length) * 100 : 0}%`,
+                  background: "currentColor",
+                }}
+              />
+            </div>
+            <button onClick={() => onModal({ type: "project", project })}>
+              Edit project
+              <ArrowUpRight size={15} />
+            </button>
+          </div>
         </div>
       )}
       <div className="m-view-tabs" aria-label="Task filters">

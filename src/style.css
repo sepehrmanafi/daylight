@@ -4872,3 +4872,137 @@ kbd {
 .project-card:hover .project-photo img {
   opacity: 0.95;
 }
+
+/* Desktop project banner harmony */
+.project-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  isolation: isolate;
+}
+.project-banner .project-svg-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -3;
+}
+.project-banner > img {
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+.app.theme-midnight .project-banner > img {
+  mix-blend-mode: luminosity;
+  opacity: 0.45;
+}
+
+/* Celestial Focus Environment: Moon to Rising Sun */
+.celestial-focus-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+.celestial-sky {
+  position: absolute;
+  inset: 0;
+  /* Interpolate from deep midnight navy to warm dawn apricot */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #121622 calc((1 - var(--celestial-progress, 0)) * 100%), #ff9a76 calc(var(--celestial-progress, 0) * 100%)) 0%,
+    color-mix(in srgb, #1c2333 calc((1 - var(--celestial-progress, 0)) * 100%), #fbd289 calc(var(--celestial-progress, 0) * 100%)) 70%,
+    color-mix(in srgb, #2d384e calc((1 - var(--celestial-progress, 0)) * 100%), #f8e5b9 calc(var(--celestial-progress, 0) * 100%)) 100%
+  );
+  transition: background 1s ease-out;
+}
+.celestial-stars i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ffffffaa;
+  animation: twinkle 3s infinite ease-in-out;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.celestial-body {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+  will-change: transform, left, top, opacity;
+}
+.moon-disc {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #e9edfa 40%, #c4cfe8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b455b;
+  box-shadow: 0 0 35px rgba(220, 230, 255, 0.65), inset -4px -4px 10px rgba(0, 0, 0, 0.15);
+}
+.moon-glow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 235, 255, 0.35) 0%, transparent 70%);
+}
+.sun-disc {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7dc 30%, #fdbb2d 75%, #b21f1f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 0 50px rgba(253, 187, 45, 0.9), 0 0 90px rgba(255, 120, 50, 0.6);
+  animation: sun-pulse 4s infinite ease-in-out;
+}
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.05); filter: brightness(1.15); }
+}
+.sun-corona {
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 110, 0.45) 0%, transparent 70%);
+}
+.celestial-tag {
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+.celestial-landscape {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  z-index: 1;
+}
+
+.focus-room {
+  position: relative;
+  isolation: isolate;
+}
+.focus-room > *:not(.celestial-focus-viewport) {
+  position: relative;
+  z-index: 2;
+}

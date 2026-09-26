@@ -62,6 +62,7 @@ import { useMedia, useTaskCelebration, CompletionEffects } from "./motion.jsx";
 import { THEMES as themes, themeVars, useThemeChrome } from "./themes.js";
 import ThemePreview from "./ThemePreview.jsx";
 import ProjectArtwork from "./ProjectArtwork.jsx";
+import CelestialFocus from "./CelestialFocus.jsx";
 import { playChime, startAmbientSound, stopAmbientSound } from "./audio.js";
 import "./themes.css";
 
@@ -1342,6 +1343,7 @@ function App() {
                     className="project-banner"
                     style={{ background: currentProject.color }}
                   >
+                    <ProjectArtwork name={currentProject.name} color={currentProject.color} />
                     <div>
                       <span className="eyebrow">SPACE FOR WHAT MATTERS</span>
                       <h2>
@@ -2616,6 +2618,9 @@ function FocusView({
   }
 
   const soundLabel = soundType === "brown" ? "Brown noise" : soundType === "rain" ? "Gentle rain" : soundType === "forest" ? "Forest breeze" : "Alpha waves";
+  const totalSeconds = (timer.duration || 25) * 60;
+  const elapsed = Math.max(0, totalSeconds - seconds);
+
   return (
     <>
       <p className="view-intro">Quiet the noise. Make room for one thing.</p>
@@ -2625,6 +2630,7 @@ function FocusView({
           backgroundImage: `linear-gradient(0deg,rgba(13,28,22,.57),rgba(13,28,22,.26)),url(${photo(scene)})`,
         }}
       >
+        <CelestialFocus elapsedSeconds={elapsed} running={timer.running} />
         <div className="focus-room-top">
           <span>
             <span className={`live-dot ${timer.running ? "" : "idle"}`} />
