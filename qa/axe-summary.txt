@@ -1,0 +1,43 @@
+{
+  "Home": [],
+  "Plan": [],
+  "Focus": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": [
+        {
+          "target": [
+            "div:nth-child(2) > span"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #8f987f, background color: #edf0e3, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "div:nth-child(3) > b > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.82 (foreground color: #899277, background color: #edf0e3, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".focus-summary > div:nth-child(3) > span"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #8f987f, background color: #edf0e3, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "div:nth-child(4) > b > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.82 (foreground color: #899277, background color: #edf0e3, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "div:nth-child(4) > span"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #8f987f, background color: #edf0e3, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    }
+  ],
+  "You": []
+}

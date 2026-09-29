@@ -1,0 +1,28 @@
+
+> daylight@1.0.0 test
+> playwright test
+
+
+Running 19 tests using 2 workers
+
+  ✓   2 tests/daylight.spec.js:19:1 › First-run answers configure the workspace and persist (2.8s)
+  ✓   1 tests/mobile.spec.js:30:1 › Distinct mobile hierarchy, safe viewport widths, and desktop switch (5.7s)
+  ✓   3 tests/daylight.spec.js:57:1 › Create, edit, search, complete, undo, delete a task with subtasks (3.2s)
+  ✓   5 tests/daylight.spec.js:99:1 › Recurring tasks and board status transitions (1.7s)
+  ✓   4 tests/mobile.spec.js:61:1 › Selected-day quick capture, immediate recurrence completion, celebration and Undo (3.6s)
+  ✓   6 tests/daylight.spec.js:121:1 › Project creation, covers, task association, and safe project removal (2.5s)
+  ✓   8 tests/daylight.spec.js:150:1 › Calendar date selection and task planning (1.8s)
+  ✓   9 tests/daylight.spec.js:174:1 › Habit CRUD, daily check-ins, week navigation, and persistence (2.3s)
+  ✓   7 tests/mobile.spec.js:99:1 › Personal check-in, truthful weekly chart, habits and reflection persist (7.8s)
+  ✓  10 tests/daylight.spec.js:196:1 › Focus timer pauses, survives reload, and records a completed session (3.3s)
+  ✓  12 tests/daylight.spec.js:225:1 › Backups export, validate and restore with confirmation (1.3s)
+  ✓  13 tests/daylight.spec.js:253:1 › Installed production app shell works offline with local assets (1.1s)
+  ✓  11 tests/mobile.spec.js:130:1 › Calendar planning and touch-friendly board status changes share the same tasks (4.5s)
+  ✓  15 tests/mobile.spec.js:160:1 › Reduced motion and solid-glass preferences preserve function and persist (874ms)
+  ✓  16 tests/mobile.spec.js:183:1 › Bottom sheets lock the background, retain focus, use readable fields and reset safely (2.0s)
+  ✓  17 tests/mobile.spec.js:207:1 › Running focus session stays reachable across mobile navigation and reload (1.6s)
+  ✓  14 tests/daylight.spec.js:277:1 › Responsive onboarding and dashboard fit a phone viewport (6.5s)
+  ✓  18 tests/daylight.spec.js:307:1 › Monthly recurrence clamps month-end and reopening via editor removes successor (2.0s)
+  ✓  19 tests/daylight.spec.js:329:1 › Filtering, sorting, and reflection all save real changes (1.3s)
+
+  19 passed (30.7s)

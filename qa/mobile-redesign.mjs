@@ -1,0 +1,13 @@
+import {chromium,expect} from '@playwright/test';
+const browser=await chromium.launch();const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://localhost:4173');await page.screenshot({path:'qa/new-mobile-onboarding.png',fullPage:true});
+await page.getByLabel('What should we call you?').fill('Sepehr');for(let i=0;i<3;i++)await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Let the good days begin'}).click();
+await page.getByLabel('Dismiss notification').click();await page.waitForTimeout(400);await page.screenshot({path:'qa/new-mobile-home.png',fullPage:true});await page.screenshot({path:'qa/new-mobile-first-screen.png'});
+await expect(page.locator('.m-task-card')).toHaveCount(2);await page.locator('.m-task-card .m-task-check').first().click();await page.waitForTimeout(130);await page.screenshot({path:'qa/new-mobile-completion.png'});await page.waitForTimeout(800);
+await page.getByRole('navigation',{name:'Mobile navigation'}).getByRole('button',{name:'Plan',exact:true}).click();await page.waitForTimeout(350);await page.screenshot({path:'qa/new-mobile-plan.png',fullPage:true});
+await page.getByRole('navigation',{name:'Mobile navigation'}).getByRole('button',{name:'You',exact:true}).click();await page.waitForTimeout(350);await page.screenshot({path:'qa/new-mobile-you.png',fullPage:true});
+await page.getByRole('navigation',{name:'Mobile navigation'}).getByRole('button',{name:'Focus',exact:true}).click();await page.waitForTimeout(350);await page.screenshot({path:'qa/new-mobile-focus.png',fullPage:true});
+await page.getByLabel('Browse workspace').click();await page.getByRole('dialog').getByRole('button',{name:'Calendar',exact:true}).click();await page.waitForTimeout(350);await page.screenshot({path:'qa/new-mobile-calendar.png',fullPage:true});
+await page.getByRole('navigation',{name:'Mobile navigation'}).getByRole('button',{name:'Add a task',exact:true}).click();await page.screenshot({path:'qa/new-mobile-sheet.png',fullPage:true});await page.getByLabel('Close dialog').click();
+await page.setViewportSize({width:1440,height:1000});await page.locator('.sidebar').getByRole('button',{name:/My day/}).click();await page.waitForTimeout(350);await page.screenshot({path:'qa/desktop-preserved.png',fullPage:true});
+console.log('Errors:',errors);await browser.close();
