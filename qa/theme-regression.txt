@@ -1,0 +1,40 @@
+
+> daylight@1.0.0 test
+> playwright test
+
+
+Running 31 tests using 2 workers
+
+  ✓   1 tests/daylight.spec.js:19:1 › First-run answers configure the workspace and persist (3.9s)
+  ✓   2 tests/experience.spec.js:21:1 › Onboarding swipe, back navigation, answers and first-visit persistence (4.5s)
+  ✓   4 tests/experience.spec.js:71:1 › Supplied dock dimensions, retained icons, drag-to-select, and active-tab taps (3.2s)
+  ✓   3 tests/daylight.spec.js:57:1 › Create, edit, search, complete, undo, delete a task with subtasks (4.5s)
+  ✓   6 tests/daylight.spec.js:99:1 › Recurring tasks and board status transitions (3.6s)
+  ✓   5 tests/experience.spec.js:111:1 › Mood is a draft until saved; keyboard slider, optional context, reload and backup (4.9s)
+  ✓   7 tests/daylight.spec.js:121:1 › Project creation, covers, task association, and safe project removal (4.4s)
+  ✓   8 tests/experience.spec.js:150:1 › Legacy moods remain valid; honest gaps, date editing and confirmed removal (4.4s)
+  ✓  10 tests/experience.spec.js:200:1 › All slides fit narrow phones; Home entrance and reduced motion; desktop You (1.2s)
+  ✓   9 tests/daylight.spec.js:150:1 › Calendar date selection and task planning (2.7s)
+  ✓  12 tests/daylight.spec.js:174:1 › Habit CRUD, daily check-ins, week navigation, and persistence (3.5s)
+  ✓  11 tests/mobile.spec.js:30:1 › Distinct mobile hierarchy, safe viewport widths, and desktop switch (8.2s)
+  ✓  13 tests/daylight.spec.js:196:1 › Focus timer pauses, survives reload, and records a completed session (5.1s)
+  ✓  15 tests/daylight.spec.js:225:1 › Backups export, validate and restore with confirmation (2.3s)
+  ✓  16 tests/daylight.spec.js:253:1 › Installed production app shell works offline with local assets (1.5s)
+  ✓  14 tests/mobile.spec.js:61:1 › Selected-day quick capture, immediate recurrence completion, celebration and Undo (5.4s)
+  ✓  17 tests/daylight.spec.js:277:1 › Responsive onboarding and dashboard fit a phone viewport (6.6s)
+  ✓  19 tests/daylight.spec.js:307:1 › Monthly recurrence clamps month-end and reopening via editor removes successor (2.8s)
+  ✓  18 tests/mobile.spec.js:99:1 › Personal check-in, truthful weekly chart, habits and reflection persist (9.9s)
+  ✓  20 tests/daylight.spec.js:329:1 › Filtering, sorting, and reflection all save real changes (2.9s)
+  ✓  22 tests/themes.spec.js:39:3 › sunshine: setup previews real colors; mobile, desktop, chrome and reload agree (2.3s)
+  ✓  21 tests/mobile.spec.js:131:1 › Calendar planning and touch-friendly board status changes share the same tasks (6.4s)
+  ✓  23 tests/themes.spec.js:39:3 › blossom: setup previews real colors; mobile, desktop, chrome and reload agree (3.4s)
+  ✓  24 tests/mobile.spec.js:161:1 › Reduced motion and solid-glass preferences preserve function and persist (1.3s)
+  ✓  25 tests/themes.spec.js:39:3 › sage: setup previews real colors; mobile, desktop, chrome and reload agree (3.3s)
+  ✓  26 tests/mobile.spec.js:184:1 › Bottom sheets lock the background, retain focus, use readable fields and reset safely (4.3s)
+  ✓  27 tests/themes.spec.js:39:3 › midnight: setup previews real colors; mobile, desktop, chrome and reload agree (3.1s)
+  ✓  28 tests/mobile.spec.js:208:1 › Running focus session stays reachable across mobile navigation and reload (3.3s)
+  ✓  29 tests/themes.spec.js:97:3 › Settings 390px: preview is temporary, Escape restores, Save persists without data loss (4.8s)
+  ✓  30 tests/themes.spec.js:97:3 › Settings 1440px: preview is temporary, Escape restores, Save persists without data loss (4.6s)
+  ✓  31 tests/themes.spec.js:136:1 › Midnight round-trips in a backup; restore overrides unsaved theme previews (3.0s)
+
+  31 passed (1.2m)
