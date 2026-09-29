@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Sun,
   Moon,
@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Timer,
   Target,
+  ChevronRight,
 } from "lucide-react";
 import { themeVars, useThemeChrome } from "./themes.js";
 import ThemePreview from "./ThemePreview.jsx";
@@ -21,7 +22,7 @@ import {
   IllustrationStep3,
   IllustrationStep4,
 } from "./OnboardingIllustrations.jsx";
-const image = (n) => `${import.meta.env.BASE_URL}images/${n}.jpg`;
+
 export function useSwipe(onNext, onBack) {
   const start = useRef(null);
   return {
@@ -43,60 +44,62 @@ export function useSwipe(onNext, onBack) {
     },
   };
 }
+
 const stories = [
   {
-    kicker: "LESS BUSY. MORE YOU.",
+    kicker: "WELCOME TO DAYLIGHT · STEP 1",
     title: (
       <>
-        A little clarity.
+        A calm space for
         <br />
-        <em>A lot more possibility.</em>
+        <em>your biggest ideas.</em>
       </>
     ),
-    copy: "Your big plans and everyday little things. Together, in a space that feels like you.",
+    copy: "Quiet the noise. Organize your life, creative projects, and daily tasks in one tranquil space.",
     art: "onboard-momentum",
     color: "#f6c588",
   },
   {
-    kicker: "ROOM FOR EVERY SIDE OF YOU.",
+    kicker: "STREAMLINED WORKFLOW · STEP 2",
     title: (
       <>
-        Make space for
+        Focus on what
         <br />
-        <em>what lights you up.</em>
+        <em>truly matters.</em>
       </>
     ),
-    copy: "Work, wellbeing, wild ideas. Give the things you care about a little room to grow.",
+    copy: "Break down ambitious visions into gentle, bite-sized daily rituals without feeling overwhelmed.",
     art: "onboard-space",
     color: "#efc5d8",
   },
   {
-    kicker: "SMALL STEPS. YOUR PACE.",
+    kicker: "DEEP WORK WITHOUT LIMITS · STEP 3",
     title: (
       <>
-        Less pressure.
+        Enter flow on
         <br />
-        <em>A little more flow.</em>
+        <em>your own terms.</em>
       </>
     ),
-    copy: "A realistic day feels better than a perfect plan. Let’s find a rhythm that fits yours.",
+    copy: "An open-ended, tranquil focus environment designed to foster genuine creative momentum.",
     art: "focus-sculpture",
     color: "#d2c3ec",
   },
   {
-    kicker: "A FRESH LITTLE START.",
+    kicker: "YOUR SANCTUARY · STEP 4",
     title: (
       <>
-        Your day.
+        Work with clarity,
         <br />
-        <em>Made a little brighter.</em>
+        <em>anywhere.</em>
       </>
     ),
-    copy: "A space for progress, pauses, and everything in between. Make yourself at home.",
+    copy: "Zero intrusive trackers or noisy alerts. Just you, your day, and room for possibility.",
     art: "mindful-morning",
     color: "#e1e7c8",
   },
 ];
+
 export default function SetupJourney({
   initialProfile,
   areas,
@@ -108,7 +111,9 @@ export default function SetupJourney({
     [direction, setDirection] = useState(1);
   const [furthest, setFurthest] = useState(0);
   const heading = useRef(null);
+
   const upd = (key, value) => setP((prev) => ({ ...prev, [key]: value }));
+
   const change = (n) => {
     n = Math.max(0, Math.min(3, n));
     if (n > 1 && !p.areas.length) n = 1;
@@ -121,6 +126,7 @@ export default function SetupJourney({
       heading.current?.focus({ preventScroll: true });
     });
   };
+
   const next = () => {
     if (step < 3) change(step + 1);
     else
@@ -130,14 +136,17 @@ export default function SetupJourney({
         routine: p.routine || "Anytime",
       });
   };
+
   const swipe = useSwipe(
     () => {
       if (step < 3) change(step + 1);
     },
     () => change(step - 1),
   );
+
   const story = stories[step];
   useThemeChrome(step === 3 ? p.theme : "sunshine");
+
   return (
     <div
       className={`setup-journey ${step === 3 ? "is-palette-step" : ""}`}
@@ -191,6 +200,7 @@ export default function SetupJourney({
           aria-roledescription="slide"
           aria-label={`Step ${step + 1} of 4`}
         >
+          {/* Animated Onboarding Poster with bespoke illustrations */}
           <section className="journey-poster">
             <div className="journey-art">
               {step === 0 ? (
@@ -228,6 +238,8 @@ export default function SetupJourney({
               <i> / 04</i>
             </span>
           </section>
+
+          {/* Onboarding-style Questions Flow */}
           <section className="journey-questions">
             <div className="journey-question-heading">
               <span className="journey-eyebrow">
@@ -236,7 +248,7 @@ export default function SetupJourney({
               <h1 ref={heading} tabIndex={-1}>
                 {
                   [
-                    "What brings you here?",
+                    "What should we call you?",
                     "What matters to you?",
                     "What feels manageable?",
                     "Ready for a fresh start?",
@@ -248,32 +260,46 @@ export default function SetupJourney({
                   [
                     "A few small choices. A space that’s actually yours.",
                     "Pick your life areas. We’ll make them your first projects.",
-                    "No perfect streaks required. You can change this anytime.",
-                    "A little preview of your very own Daylight.",
+                    "A realistic pace feels better than an impossible plan.",
+                    "Every space in Daylight begins right here.",
                   ][step]
                 }
               </p>
             </div>
+
             {step === 0 && (
               <>
-                <label htmlFor="journey-name">What should we call you?</label>
-                <input
-                  id="journey-name"
-                  className="journey-name"
-                  placeholder="Your first name"
-                  maxLength={35}
-                  value={p.name}
-                  onChange={(e) => upd("name", e.target.value)}
-                  autoComplete="given-name"
-                />
+                <div className="journey-field">
+                  <label htmlFor="name-input">What should we call you?</label>
+                  <input
+                    id="name-input"
+                    value={p.name}
+                    placeholder="Your name or nickname"
+                    maxLength={28}
+                    onChange={(e) => upd("name", e.target.value)}
+                    autoFocus
+                  />
+                </div>
                 <fieldset>
                   <legend>What brings you to Daylight?</legend>
-                  <div className="journey-purpose">
+                  <div className="journey-purposes">
                     {[
-                      ["Work & projects", BriefcaseBusiness],
-                      ["Everyday life", Heart],
-                      ["A little of both", Sparkles],
-                    ].map(([name, Icon]) => (
+                      {
+                        name: "Everyday life",
+                        desc: "Small steps, gentle habits, less mental clutter.",
+                        icon: Heart,
+                      },
+                      {
+                        name: "Work & projects",
+                        desc: "Big ideas, milestones, deep quiet focus.",
+                        icon: BriefcaseBusiness,
+                      },
+                      {
+                        name: "Everything together",
+                        desc: "A calm blend of work, home, and mindful moments.",
+                        icon: Sparkles,
+                      },
+                    ].map(({ name, desc, icon: Icon }) => (
                       <button
                         key={name}
                         className={p.purpose === name ? "selected" : ""}
@@ -304,6 +330,7 @@ export default function SetupJourney({
                 </p>
               </>
             )}
+
             {step === 1 && (
               <>
                 <div className="journey-areas">
@@ -335,6 +362,7 @@ export default function SetupJourney({
                 </p>
               </>
             )}
+
             {step === 2 && (
               <>
                 <fieldset>
@@ -352,11 +380,13 @@ export default function SetupJourney({
                     ]}
                   />
                 </fieldset>
+
+                {/* Starting rhythm selector: unconstrained, open-ended focus mode */}
                 <fieldset>
-                  <legend className="sr-only">How much time can you give one thing?</legend>
+                  <legend className="sr-only">Optional starting rhythm (can be adjusted anytime)</legend>
                   <InteractiveSlider
-                    label="Focus rhythm"
-                    value={p.focus}
+                    label="Starting focus rhythm"
+                    value={p.focus || 25}
                     unit="min"
                     ariaLabel="Focus duration slider"
                     onChange={(val) => upd("focus", val)}
@@ -367,6 +397,7 @@ export default function SetupJourney({
                     ]}
                   />
                 </fieldset>
+
                 <fieldset>
                   <legend>When does a little focus fit your day?</legend>
                   <div className="journey-routine">
@@ -385,10 +416,11 @@ export default function SetupJourney({
                   </div>
                 </fieldset>
                 <p className="journey-helper">
-                  A gentle cue on Home, not a notification.
+                  A gentle cue on Home, not a notification. Focus is open-ended whenever you start.
                 </p>
               </>
             )}
+
             {step === 3 && (
               <>
                 <fieldset>
@@ -428,7 +460,7 @@ export default function SetupJourney({
                   </span>
                   <span>
                     <Timer size={18} />
-                    <b>{p.focus}</b> minutes to focus
+                    <b>Open-ended</b> focus mode
                   </span>
                   <span>
                     <Sun size={18} />

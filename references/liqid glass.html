@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glass Navigation Bar</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .glass-nav {
+      --cos: 0;
+      --sin: 0;
+      --rim-intensity: 0.6;
+      --rim-gradient: none;
+    }
+
+    /* Glass Effect & Specular Bevel */
+    .glass-specular {
+      background: color-mix(in srgb, white 12%, transparent);
+      backdrop-filter: blur(12px) saturate(180%) brightness(1.05);
+      -webkit-backdrop-filter: blur(12px) saturate(180%) brightness(1.05);
+      box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, white 20%, transparent),
+        inset 0px 2px 4px -1px color-mix(in srgb, white 40%, transparent),
+        inset 0px -2px 4px -1px color-mix(in srgb, black 20%, transparent),
+        0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Outer Rim Highlight */
+    .glass-rim {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    /* Flat Gray Indicator Pill */
+    .simple-gray-pill {
+      background: rgba(110, 110, 120, 0.42);
+      border: none;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 min-h-screen flex items-center justify-center m-0 p-0 select-none font-sans overflow-hidden">
+
+  <!-- Centered Glass Nav Wrapper -->
+  <div id="nav-wrapper" class="relative z-20 pointer-events-auto">
+    <nav 
+      id="glass-nav"
+      class="glass-nav relative inline-flex items-center p-2.5 h-[76px] w-[420px] border-0 bg-transparent outline-none rounded-full"
+    >
+      <!-- Specular Glass Layer -->
+      <span id="specular-layer" class="glass-specular absolute inset-0 rounded-[inherit] pointer-events-none z-0"></span>
+      
+      <!-- Outer Rim Border -->
+      <span class="glass-rim absolute inset-0 z-10 rounded-[inherit] pointer-events-none"></span>
+      
+      <!-- Icons Container (5 Columns RTL) -->
+      <div id="icons-container" class="relative z-20 grid grid-cols-5 items-center w-full h-full">
+        
+        <!-- Active Indicator Pill -->
+        <div 
+          id="active-pill" 
+          class="simple-gray-pill absolute top-0 bottom-0 my-auto h-[58px] rounded-full pointer-events-auto cursor-grab active:cursor-grabbing z-10 touch-none transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+        ></div>
+
+        <!-- 1. Edit Pencil Icon (Rightmost) -->
+        <button type="button" class="nav-btn relative z-20 w-full h-full flex items-center justify-center rounded-full opacity-60 hover:opacity-100 transition-all duration-200 cursor-pointer outline-none select-none" title="ویرایش">
+          <img src="https://uploadkon.ir/uploads/606217_26icons8-edit-pencil-64.png" alt="ویرایش" class="w-7 h-7 object-contain pointer-events-none brightness-0 invert" />
+        </button>
+
+        <!-- 2. Book Icon -->
+        <button type="button" class="nav-btn relative z-20 w-full h-full flex items-center justify-center rounded-full opacity-60 hover:opacity-100 transition-all duration-200 cursor-pointer outline-none select-none" title="کتاب">
+          <img src="https://uploadkon.ir/uploads/6fc817_26icons8-book-64.png" alt="کتاب" class="w-7 h-7 object-contain pointer-events-none brightness-0 invert" />
+        </button>
+
+        <!-- 3. Home Page Icon (Default Active / Center) -->
+        <button type="button" class="nav-btn relative z-20 w-full h-full flex items-center justify-center rounded-full opacity-100 transition-all duration-200 cursor-pointer outline-none select-none" title="خانه">
+          <img src="https://uploadkon.ir/uploads/9a9717_26icons8-home-page-64.png" alt="خانه" class="w-7 h-7 object-contain pointer-events-none brightness-0 invert" />
+        </button>
+
+        <!-- 4. Leaderboard Icon -->
+        <button type="button" class="nav-btn relative z-20 w-full h-full flex items-center justify-center rounded-full opacity-60 hover:opacity-100 transition-all duration-200 cursor-pointer outline-none select-none" title="جدول امتیازات">
+          <img src="https://uploadkon.ir/uploads/eac517_26icons8-leaderboard-64.png" alt="جدول امتیازات" class="w-7 h-7 object-contain pointer-events-none brightness-0 invert" />
+        </button>
+
+        <!-- 5. Test Passed Icon (Leftmost) -->
+        <button type="button" class="nav-btn relative z-20 w-full h-full flex items-center justify-center rounded-full opacity-60 hover:opacity-100 transition-all duration-200 cursor-pointer outline-none select-none" title="آزمون">
+          <img src="https://uploadkon.ir/uploads/244a17_26icons8-test-passed-64.png" alt="آزمون" class="w-7 h-7 object-contain pointer-events-none brightness-0 invert" />
+        </button>
+
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll(".nav-btn");
+    const pill = document.getElementById("active-pill");
+    const iconsContainer = document.getElementById("icons-container");
+
+    let activeIndex = 2; // Default Active: Home Icon (Center)
+    let isDragging = false;
+    let startX = 0;
+    let initialPillLeft = 0;
+
+    // Position Active Pill Function
+    function updatePillPosition(index, animate = true) {
+      const btn = buttons[index];
+      if (!btn) return;
+
+      if (!animate) {
+        pill.style.transition = 'none';
+      } else {
+        pill.style.transition = 'all 0.35s cubic-bezier(0.34, 1.4, 0.64, 1)';
+      }
+
+      const containerRect = iconsContainer.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+
+      const left = btnRect.left - containerRect.left;
+      const width = btnRect.width;
+
+      pill.style.left = `${left}px`;
+      pill.style.width = `${width}px`;
+
+      buttons.forEach((b, idx) => {
+        if (idx === index) {
+          b.classList.add("opacity-100", "scale-110");
+          b.classList.remove("opacity-60");
+        } else {
+          b.classList.remove("opacity-100", "scale-110");
+          b.classList.add("opacity-60");
+        }
+      });
+    }
+
+    // Setup Dragging & Clicking Interaction
+    function initPillInteractions() {
+      buttons.forEach((btn, idx) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          activeIndex = idx;
+          updatePillPosition(activeIndex, true);
+        });
+      });
+
+      const onPointerDown = (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        const containerRect = iconsContainer.getBoundingClientRect();
+        initialPillLeft = pill.getBoundingClientRect().left - containerRect.left;
+        pill.style.transition = 'none';
+        pill.setPointerCapture(e.pointerId);
+      };
+
+      const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - startX;
+        let newLeft = initialPillLeft + deltaX;
+
+        const maxLeft = iconsContainer.offsetWidth - pill.offsetWidth;
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+
+        pill.style.left = `${newLeft}px`;
+
+        const pillCenter = newLeft + pill.offsetWidth / 2;
+        let closestIdx = 0;
+        let minDistance = Infinity;
+
+        buttons.forEach((btn, idx) => {
+          const btnCenter = btn.offsetLeft + btn.offsetWidth / 2;
+          const dist = Math.abs(pillCenter - btnCenter);
+          if (dist < minDistance) {
+            minDistance = dist;
+            closestIdx = idx;
+          }
+        });
+
+        buttons.forEach((b, idx) => {
+          if (idx === closestIdx) {
+            b.classList.add("opacity-100", "scale-110");
+            b.classList.remove("opacity-60");
+          } else {
+            b.classList.remove("opacity-100", "scale-110");
+            b.classList.add("opacity-60");
+          }
+        });
+      };
+
+      const onPointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        try { pill.releasePointerCapture(e.pointerId); } catch(err){}
+
+        const pillCenter = parseFloat(pill.style.left) + pill.offsetWidth / 2;
+        let closestIdx = 0;
+        let minDistance = Infinity;
+
+        buttons.forEach((btn, idx) => {
+          const btnCenter = btn.offsetLeft + btn.offsetWidth / 2;
+          const dist = Math.abs(pillCenter - btnCenter);
+          if (dist < minDistance) {
+            minDistance = dist;
+            closestIdx = idx;
+          }
+        });
+
+        activeIndex = closestIdx;
+        updatePillPosition(activeIndex, true);
+      };
+
+      pill.addEventListener("pointerdown", onPointerDown);
+      pill.addEventListener("pointermove", onPointerMove);
+      pill.addEventListener("pointerup", onPointerUp);
+      pill.addEventListener("pointercancel", onPointerUp);
+
+      setTimeout(() => updatePillPosition(activeIndex, false), 50);
+      window.addEventListener("resize", () => updatePillPosition(activeIndex, false));
+    }
+
+    window.addEventListener("DOMContentLoaded", initPillInteractions);
+  </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ async function onboard(page, { examples = true } = {}) {
   if (!examples) await page.getByRole("checkbox").uncheck();
   await page.getByRole("button", { name: "Let the good days begin" }).click();
   await expect(
-    page.getByRole("heading", { name: "Hello, Alex" }),
+    page.getByRole("heading", { name: /(?:Hello|Hi), Alex/ }),
   ).toBeVisible();
 }
 const data = (page) =>
@@ -233,21 +233,17 @@ test("Backups export, validate and restore with confirmation", async ({
   expect(download.suggestedFilename()).toMatch(/daylight-backup-.*\.json/);
   const d = await data(page);
   d.profile.name = "Restored";
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "invalid.json",
-      mimeType: "application/json",
-      buffer: Buffer.from("{}"),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "invalid.json",
+    mimeType: "application/json",
+    buffer: Buffer.from("{}"),
+  });
   await expect(page.getByRole("alert")).toBeVisible();
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "backup.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(d)),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "backup.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(d)),
+  });
   await expect(page.getByText("Replace this workspace?")).toBeVisible();
   await page.getByRole("button", { name: "Yes, restore backup" }).click();
   await expect(
@@ -267,7 +263,7 @@ test("Installed production app shell works offline with local assets", async ({
   await context.setOffline(true);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Hello, Alex" }),
+    page.getByRole("heading", { name: /(?:Hello|Hi), Alex/ }),
   ).toBeVisible();
   await nav(page, "Focus");
   await expect(page.locator(".big-clock")).toHaveText("25:00");
@@ -295,8 +291,11 @@ test("Responsive onboarding and dashboard fit a phone viewport", async ({
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.getByLabel("Open menu").click();
-  await nav(page, "Habits");
+  await page.getByLabel("Browse workspace").click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Rituals", exact: true })
+    .click();
   await page.waitForTimeout(300);
   expect(
     await page.evaluate(

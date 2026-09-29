@@ -246,3 +246,11 @@ export function IllustrationStep4() {
     </div>
   );
 }
+
+// Aliases for OnboardingIntro and Journey
+export {
+  IllustrationStep1 as IntroScene1,
+  IllustrationStep2 as IntroScene2,
+  IllustrationStep3 as IntroScene3,
+  IllustrationStep4 as IntroScene4,
+};

@@ -62,7 +62,7 @@ import { useMedia, useTaskCelebration, CompletionEffects } from "./motion.jsx";
 import { THEMES as themes, themeVars, useThemeChrome } from "./themes.js";
 import ThemePreview from "./ThemePreview.jsx";
 import ProjectArtwork from "./ProjectArtwork.jsx";
-import CelestialFocus from "./CelestialFocus.jsx";
+import ZenPulseFocus from "./ZenPulseFocus.jsx";
 import { playChime, startAmbientSound, stopAmbientSound } from "./audio.js";
 import "./themes.css";
 
@@ -685,18 +685,31 @@ function App() {
             : today()),
       projectId: projectId || currentProject?.id || "",
     });
+  const adjustTimerDuration = (deltaMinutes) => {
+    setTimer((t) => {
+      const curDur = t.duration || profile.focus || 25;
+      const newDur = Math.max(5, curDur + deltaMinutes);
+      const newRemaining = Math.max(0, (t.remaining || curDur * 60) + deltaMinutes * 60);
+      return {
+        ...t,
+        duration: newDur,
+        remaining: newRemaining,
+        until: t.running ? Date.now() + newRemaining * 1000 : t.until,
+      };
+    });
+  };
   const startPause = () => {
     if (timer.running)
       setTimer((t) => ({ ...t, running: false, remaining: seconds }));
     else {
       const remaining =
-        seconds || (timer.mode === "break" ? 5 : profile.focus) * 60;
+        seconds || (timer.mode === "break" ? 5 : (timer.duration || profile.focus || 25)) * 60;
       setTimer((t) => ({
         ...t,
         running: true,
         remaining,
         until: Date.now() + remaining * 1000,
-        duration: timer.mode === "break" ? 5 : profile.focus,
+        duration: t.duration || (t.mode === "break" ? 5 : profile.focus || 25),
       }));
     }
   };
@@ -1433,6 +1446,7 @@ function App() {
                 profile={profile}
                 onToggle={startPause}
                 onReset={resetTimer}
+                onAdjustDuration={adjustTimerDuration}
                 onSelect={(id) => setTimer((t) => ({ ...t, taskId: id }))}
                 sessions={data.sessions}
               />
@@ -2583,157 +2597,22 @@ function FocusView({
   onToggle,
   onReset,
   onSelect,
+  onAdjustDuration,
   sessions,
 }) {
-  const [scene, setScene] = useState("forest"),
-    [sound, setSound] = useState(false),
-    [soundType, setSoundType] = useState("brown");
-  const ambientInstance = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      stopAmbientSound();
-      ambientInstance.current = null;
-    };
-  }, []);
-
-  function toggleSound() {
-    if (sound) {
-      stopAmbientSound();
-      ambientInstance.current = null;
-      setSound(false);
-      return;
-    }
-    const inst = startAmbientSound(soundType, 0.45);
-    ambientInstance.current = inst;
-    setSound(!!inst);
-  }
-
-  function changeSoundType(type) {
-    setSoundType(type);
-    if (sound) {
-      const inst = startAmbientSound(type, 0.45);
-      ambientInstance.current = inst;
-    }
-  }
-
-  const soundLabel = soundType === "brown" ? "Brown noise" : soundType === "rain" ? "Gentle rain" : soundType === "forest" ? "Forest breeze" : "Alpha waves";
-  const totalSeconds = (timer.duration || 25) * 60;
-  const elapsed = Math.max(0, totalSeconds - seconds);
-
   return (
     <>
       <p className="view-intro">Quiet the noise. Make room for one thing.</p>
-      <section
-        className="focus-room"
-        style={{
-          backgroundImage: `linear-gradient(0deg,rgba(13,28,22,.57),rgba(13,28,22,.26)),url(${photo(scene)})`,
-        }}
-      >
-        <CelestialFocus elapsedSeconds={elapsed} running={timer.running} />
-        <div className="focus-room-top">
-          <span>
-            <span className={`live-dot ${timer.running ? "" : "idle"}`} />
-            {timer.running ? "IN YOUR FOCUS ERA" : "YOUR MOMENT OF CLARITY"}
-          </span>
-          <div className="focus-audio-controls">
-            <button onClick={toggleSound} className="sound-btn">
-              {sound ? <Volume2 size={17} /> : <VolumeX size={17} />}Brown noise{" "}
-              {sound ? "on" : "off"}
-            </button>
-          </div>
-        </div>
-        <div className="ambient-sound-selector" aria-label="Ambient soundscapes">
-          {[
-            ["brown", "Brown noise"],
-            ["rain", "Gentle rain"],
-            ["forest", "Forest breeze"],
-            ["binaural", "Alpha wave 432Hz"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              className={`ambient-sound-tag ${soundType === id ? "active" : ""}`}
-              onClick={() => changeSoundType(id)}
-            >
-              {soundType === id && sound && <Volume2 size={12} />}
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="focus-room-content">
-          <div className="focus-mode">
-            <button
-              className={timer.mode === "focus" ? "selected" : ""}
-              onClick={() => onReset("focus")}
-            >
-              Focus
-            </button>
-            <button
-              className={timer.mode === "break" ? "selected" : ""}
-              onClick={() => onReset("break")}
-            >
-              Short break
-            </button>
-          </div>
-          <div className="big-clock">{timeLabel(seconds)}</div>
-          <p>
-            {timer.mode === "focus"
-              ? "Be here. Do one thing well."
-              : "Step back. Take a breath. You’ve earned it."}
-          </p>
-          <div className="focus-room-controls">
-            <button className="btn" onClick={onToggle}>
-              {timer.running ? <Pause size={18} /> : <Play size={18} />}{" "}
-              {timer.running ? "Pause session" : "Start session"}
-            </button>
-            <button
-              className="round-button"
-              aria-label="Reset timer"
-              onClick={() => onReset()}
-            >
-              <RotateCcw size={18} />
-            </button>
-          </div>
-          <div className="focus-task-select">
-            <Target size={17} />
-            <select
-              aria-label="Task to focus on"
-              value={timer.taskId}
-              onChange={(e) => onSelect(e.target.value)}
-            >
-              <option value="">Just a little time to focus</option>
-              {tasks
-                .filter((t) => t.status !== "done" || t.id === timer.taskId)
-                .map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title}
-                  </option>
-                ))}
-            </select>
-          </div>
-        </div>
-        <div className="focus-room-bottom">
-          <div className="scene-picker">
-            {[
-              ["forest", "Forest"],
-              ["coast", "Lakeside"],
-              ["studio", "Studio"],
-            ].map(([id, name]) => (
-              <button
-                key={id}
-                title={name}
-                aria-label={`${name} background`}
-                className={scene === id ? "selected" : ""}
-                onClick={() => setScene(id)}
-              >
-                <img src={photo(id)} alt={name} />
-              </button>
-            ))}
-          </div>
-          <span>No rush. Just you, and this moment.</span>
-        </div>
-      </section>
+      <ZenPulseFocus
+        seconds={seconds}
+        timer={timer}
+        tasks={tasks}
+        profile={profile}
+        onToggle={onToggle}
+        onReset={onReset}
+        onSelect={onSelect}
+        onAdjustDuration={onAdjustDuration}
+      />
       <div className="focus-bottom">
         <div className="focus-summary">
           <span className="stat-icon purple">
