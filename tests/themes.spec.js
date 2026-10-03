@@ -24,8 +24,13 @@ const palette = {
 };
 const stored = (p) =>
   p.evaluate(() => JSON.parse(localStorage.getItem("daylight.workspace.v1")));
+async function skipIntro(p) {
+  const skip = p.getByRole("button", { name: "Skip", exact: true });
+  await skip.click();
+}
 async function setup(p, theme = "sunshine") {
   await p.goto("/");
+  await skipIntro(p);
   await p.getByLabel("What should we call you?").fill("Mina");
   for (let i = 0; i < 3; i++)
     await p.getByRole("button", { name: "Continue", exact: true }).click();

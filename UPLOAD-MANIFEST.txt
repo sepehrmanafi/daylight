@@ -1,0 +1,6 @@
+Daylight Intro Slider update
+
+Copy the files in this folder into the repository root, preserving directories.
+The manifest is for reference only and does not need to be uploaded.
+Do not upload node_modules, dist, test-results, or generated web-release output.
+Run npm install and npm run build after copying.

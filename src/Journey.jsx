@@ -22,28 +22,7 @@ import {
   IllustrationStep3,
   IllustrationStep4,
 } from "./OnboardingIllustrations.jsx";
-
-export function useSwipe(onNext, onBack) {
-  const start = useRef(null);
-  return {
-    onPointerDown: (e) => {
-      if (e.target.closest("input,textarea,select,button,a")) return;
-      start.current = { x: e.clientX, y: e.clientY };
-    },
-    onPointerUp: (e) => {
-      const p = start.current;
-      start.current = null;
-      if (!p) return;
-      const x = e.clientX - p.x,
-        y = e.clientY - p.y;
-      if (Math.abs(x) > 55 && Math.abs(x) > Math.abs(y) * 1.4)
-        (x < 0 ? onNext : onBack)();
-    },
-    onPointerCancel: () => {
-      start.current = null;
-    },
-  };
-}
+import { useSwipe } from "./useSwipe.js";
 
 const stories = [
   {

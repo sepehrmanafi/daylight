@@ -10,8 +10,13 @@ const dock = (p, name) =>
   p
     .getByRole("navigation", { name: "Mobile navigation" })
     .getByRole("button", { name, exact: true });
+async function skipIntro(p) {
+  const skip = p.getByRole("button", { name: "Skip", exact: true });
+  await skip.click();
+}
 async function setup(p) {
   await p.goto("/");
+  await skipIntro(p);
   await p.getByLabel("What should we call you?").fill("Mina");
   for (let i = 0; i < 3; i++)
     await p.getByRole("button", { name: "Continue", exact: true }).click();
@@ -22,6 +27,7 @@ test("Onboarding swipe, back navigation, answers and first-visit persistence", a
   page,
 }) => {
   await page.goto("/");
+  await skipIntro(page);
   await page.getByLabel("What should we call you?").fill("Mina");
   await page
     .getByRole("button", { name: "Everyday life", exact: true })
@@ -201,6 +207,7 @@ test("All slides fit narrow phones; Home entrance and reduced motion; desktop Yo
   page,
 }) => {
   await page.goto("/");
+  await skipIntro(page);
   for (const width of [320, 360, 390, 430, 768, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     expect(
