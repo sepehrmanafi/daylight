@@ -15,7 +15,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
-import { useSwipe } from "./Journey.jsx";
+import { useSwipe } from "./useSwipe.js";
 export const FEELINGS = [
   {
     id: "low",

@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
+async function skipIntro(page) {
+  const skip = page.getByRole("button", { name: "Skip", exact: true });
+  await skip.click();
+}
 async function onboard(page, { examples = true } = {}) {
   await page.goto("/");
+  await skipIntro(page);
   await page.getByLabel("What should we call you?").fill("Alex");
   for (let i = 0; i < 3; i++)
     await page.getByRole("button", { name: "Continue", exact: true }).click();
@@ -22,6 +27,7 @@ test("First-run answers configure the workspace and persist", async ({
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
+  await skipIntro(page);
   await page.getByLabel("What should we call you?").fill("Mina");
   await page.getByRole("button", { name: "Work & projects" }).click();
   await page.getByRole("button", { name: "Continue", exact: true }).click();

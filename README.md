@@ -42,6 +42,8 @@ The standalone `Daylight.html` preview is an optional self-contained copy. Its s
 
 ## Your first visit
 
+A short, three-slide welcome story appears before setup on a new browser profile / origin. It explains the three Daylight habits—clear the mental clutter, focus on today, and notice progress—then continues into the existing questionnaire. **Skip** and **Get Started** both remember the welcome as complete; refreshing halfway through restarts the story. The last questionnaire is still the only step that creates a workspace.
+
 The setup appears once per browser profile / origin and directly affects your workspace:
 
 | Question | What actually changes |
@@ -55,7 +57,7 @@ The setup appears once per browser profile / origin and directly affects your wo
 | Your palette | Changes the whole mobile and desktop UI: backgrounds, hero, cards, sidebar/navigation, buttons, forms and dialogs; previews immediately |
 | Starter inspiration | Optionally adds editable example tasks and everyday rituals |
 
-You can edit preferences later. Setup is not repeated on ordinary reloads. Clearing browser data or using a different browser/origin creates a fresh workspace.
+You can edit preferences later. Setup is not repeated on ordinary reloads. Settings also includes **Replay intro** for a preview of the welcome story. For manual testing, clear `daylight.intro.completed.v1` (and `daylight.workspace.v1` if you want to start the questionnaire over) in DevTools → Application → Local Storage. Clearing browser data or using a different browser/origin creates a fresh workspace.
 
 ## Working features
 
@@ -111,14 +113,16 @@ npm start
 npm test
 ```
 
-The twelve browser tests cover onboarding personalization and persistence, task CRUD/subtasks/search, recurrence and board status, projects, calendar creation, habits, timer completion, backup restore, offline operation, and responsive layout. Set `TEST_URL` to test another running deployment.
+The browser tests cover the welcome story, onboarding personalization and persistence, task CRUD/subtasks/search, recurrence and board status, projects, calendar creation, habits, timer completion, backup restore, offline operation, and responsive layout. Set `TEST_URL` to test another running deployment.
 
 ## Research and imagery
 
 See `RESEARCH.md` and `ASSET-CREDITS.md`. Your screenshots were used for design direction, not copied into the interface. The sunny studio and daisy images are AI-generated. Other photography is locally bundled from Unsplash; see the credits and licensing note before wider publication.
 
 ## Source map
-- `src/main.jsx`: shared state, onboarding, desktop views, editors, persistence, timer and backup validation.
+- `src/main.jsx`: shared state, first-visit gating, onboarding handoff, desktop views, editors, persistence, timer and backup validation.
+- `src/OnboardingIntro.jsx`, `src/introConfig.js`, `src/IntroIllustrations.jsx`, `src/intro.css`: lazy welcome slider, editable slide copy, original SVG scenes and motion/accessibility styling.
+- `src/analytics.js`: optional `daylight:analytics` event hook for onboarding events.
 - `src/Mobile.jsx`: independent mobile navigation and page hierarchy.
 - `src/motion.jsx`: media preference hook and nonblocking task celebrations.
 - `src/style.css`: desktop/shared visual system.
@@ -137,4 +141,4 @@ See `RESEARCH.md` and `ASSET-CREDITS.md`. Your screenshots were used for design 
 
 New modules: `src/Journey.jsx`, `src/GlassNav.jsx`, `src/MoodSpace.jsx`, `src/experience.css`. The unmodified user-supplied navigation source is archived in `references/liqid glass.html`; its CDN/image URLs are not used by the running app.
 
-To see the welcome slides on an existing installation, use a separate private/incognito tab rather than deleting your workspace. Keep the regular tab for your existing tasks.
+To see the welcome slides on an existing installation, use **Settings → Replay intro**; it leaves the current workspace untouched. The completion marker is local-first because this build has no authentication or server-side profile.

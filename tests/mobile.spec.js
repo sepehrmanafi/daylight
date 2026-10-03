@@ -10,6 +10,10 @@ const dock = (p, name) =>
   p
     .getByRole("navigation", { name: "Mobile navigation" })
     .getByRole("button", { name, exact: true });
+async function skipIntro(p) {
+  const skip = p.getByRole("button", { name: "Skip", exact: true });
+  await skip.click();
+}
 const browse = async (p, name) => {
   await p.getByLabel("Browse workspace").click();
   await p
@@ -19,6 +23,7 @@ const browse = async (p, name) => {
 };
 async function onboard(p, examples = true) {
   await p.goto("/");
+  await skipIntro(p);
   await p.getByLabel("What should we call you?").fill("Sepehr");
   for (let i = 0; i < 3; i++)
     await p.getByRole("button", { name: "Continue", exact: true }).click();

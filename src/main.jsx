@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import {
   Sun,
@@ -55,7 +55,6 @@ import {
 } from "lucide-react";
 import "./fonts.css";
 import "./style.css";
-import SetupJourney from "./Journey.jsx";
 import MoodSpace from "./MoodSpace.jsx";
 import MobileExperience, { MobileBrowse } from "./Mobile.jsx";
 import { useMedia, useTaskCelebration, CompletionEffects } from "./motion.jsx";
@@ -65,8 +64,37 @@ import ProjectArtwork from "./ProjectArtwork.jsx";
 import ZenPulseFocus from "./ZenPulseFocus.jsx";
 import { playChime, startAmbientSound, stopAmbientSound } from "./audio.js";
 import "./themes.css";
+import { INTRO_STORAGE_KEY } from "./introConfig.js";
 
+const SetupJourney = lazy(() => import("./Journey.jsx"));
+const IntroSlider = lazy(() => import("./OnboardingIntro.jsx"));
 const KEY = "daylight.workspace.v1";
+function introWasCompleted() {
+  try {
+    return localStorage.getItem(INTRO_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+function markIntroCompleted() {
+  try {
+    localStorage.setItem(INTRO_STORAGE_KEY, "true");
+  } catch {
+    // The in-memory state still lets the user continue when storage is unavailable.
+  }
+}
+function replaceIntroEntry() {
+  try {
+    const { pathname, search, hash } = window.location;
+    window.history.replaceState(
+      window.history.state,
+      document.title,
+      `${pathname}${search}${hash}`,
+    );
+  } catch {
+    // Daylight has no separate intro route; rendering state is the source of truth.
+  }
+}
 const uid = () => crypto.randomUUID();
 const dateKey = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -223,7 +251,7 @@ function makeWorkspace(p) {
     : [];
   return {
     version: 1,
-    profile: p,
+    profile: { ...p, introCompleted: true },
     projects,
     tasks,
     habits: p.examples
@@ -368,12 +396,22 @@ function Modal({ children, onClose, title, wide = false }) {
 }
 function Onboarding({ onFinish }) {
   return (
-    <SetupJourney
-      initialProfile={defaultProfile}
-      areas={AREAS}
-      themes={themes}
-      onFinish={onFinish}
-    />
+    <Suspense
+      fallback={
+        <div
+          className="onboarding-loading"
+          aria-busy="true"
+          aria-label="Loading your setup"
+        />
+      }
+    >
+      <SetupJourney
+        initialProfile={defaultProfile}
+        areas={AREAS}
+        themes={themes}
+        onFinish={onFinish}
+      />
+    </Suspense>
   );
 }
 
@@ -384,6 +422,8 @@ function App() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [isMobile]);
   const [data, setData] = useState(load),
+    [introOpen, setIntroOpen] = useState(() => !introWasCompleted()),
+    [replayingIntro, setReplayingIntro] = useState(false),
     [view, setView] = useState("My day"),
     [modal, setModal] = useState(null),
     [toast, setToast] = useState(null),
@@ -423,12 +463,16 @@ function App() {
     toastTimer.current = setTimeout(() => setToast(null), 5000);
   };
   useEffect(() => {
-    if (data)
+    if (data) {
+      // An existing workspace means the old questionnaire was already completed.
+      // Treat it as seen even if this newer marker did not exist yet.
+      markIntroCompleted();
       try {
         localStorage.setItem(KEY, JSON.stringify(data));
       } catch {
         notify("Storage is full. Export a backup from Settings.");
       }
+    }
   }, [data]);
   useEffect(() => {
     try {
@@ -477,7 +521,7 @@ function App() {
   }, []);
   useEffect(() => {
     const f = (e) => {
-      if (!data) return;
+      if (!data || replayingIntro) return;
       const typing = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
@@ -502,7 +546,30 @@ function App() {
     };
     window.addEventListener("keydown", f);
     return () => window.removeEventListener("keydown", f);
-  }, [data, modal, view]);
+  }, [data, modal, view, replayingIntro]);
+  const commitIntro = () => {
+    markIntroCompleted();
+    replaceIntroEntry();
+  };
+  const finishIntro = () => {
+    setIntroOpen(false);
+    setReplayingIntro(false);
+  };
+  const showIntro = introOpen && (!data || replayingIntro);
+  if (showIntro)
+    return (
+      <Suspense
+        fallback={
+          <div
+            className="intro-loading"
+            aria-busy="true"
+            aria-label="Loading Daylight"
+          />
+        }
+      >
+        <IntroSlider onCommit={commitIntro} onComplete={finishIntro} />
+      </Suspense>
+    );
   if (!data)
     return (
       <Onboarding
@@ -1608,6 +1675,11 @@ function App() {
         <SettingsModal
           data={data}
           onThemePreview={setPreviewTheme}
+          onReplayIntro={() => {
+            setReplayingIntro(true);
+            setIntroOpen(true);
+            setModal(null);
+          }}
           onClose={() => setModal(null)}
           onSave={(p) => {
             update((d) => ({ ...d, profile: p }));
@@ -2956,6 +3028,7 @@ function validWorkspace(d) {
 function SettingsModal({
   data,
   onClose,
+  onReplayIntro,
   onSave,
   onImport,
   notify,
@@ -3116,6 +3189,20 @@ function SettingsModal({
               onChange={(e) => setP({ ...p, solidNav: e.target.checked })}
             />
           </label>
+        </div>
+        <div className="settings-replay">
+          <div>
+            <h3>Want the welcome back?</h3>
+            <p>Replay the short story about making room for a clearer day.</p>
+          </div>
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={onReplayIntro}
+          >
+            <RotateCcw size={15} />
+            Replay intro
+          </button>
         </div>
         <div className="settings-data">
           <h3>A little peace of mind.</h3>
